@@ -17,7 +17,7 @@ window.onload=function()
 	let divTyping = document.getElementById('etext')
 	let i = 0,
 		timer = 0,
-		str = '千里之行，始于足下。'
+		str = '秋日小镇 - Autumn Town -全屏以达到最佳观感。'
 	function typing()
 	{
 		if (i <= str.length)
