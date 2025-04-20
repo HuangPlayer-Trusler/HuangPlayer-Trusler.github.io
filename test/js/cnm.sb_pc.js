@@ -183,6 +183,21 @@ window.onload=function()
 		$("#nav05").animate({"left":"0%"},800);
 	})
 	
+		
+	$.ajax({
+		url: 'https://api.imlazy.ink/mcapi/?host=mc.autumntown.top&port=25565&type=json',
+		type: 'get',
+		dataType: 'json',  
+		crossDomain: true,
+		 success: function(response, status){
+						console.log('请求Fabric服数据：' + status);
+						console.log(response);
+						$('#scplayer').replaceWith(response.players_online + ' 人');//在线玩家
+						$('#scstatus').replaceWith(response.status);//服务器开启或关闭状态
+					},
+		data: {},
+	});
+
 	//展示按钮,如果宽度大于30就执行收回，小于就执行释放 --- 缺陷占不使用
 	// $(".cleft_bottom").click(function(){
 	// 	var cleft_width = $("#cleft").width();

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head> 
+    <meta charset="utf-8"> 
+    <title>shitAPI-dl</title>
+    <script>
+    window.onload = function() {
+        // 自动下载配置
+        const fileName = "test.zip";  // 要下载的文件名
+        const saveAs = "test.zip"; // 保存时的默认文件名
+
+        // 创建隐藏下载链接
+        const link = document.createElement('a');
+        link.style.display = 'none';
+        link.href = fileName;
+        link.download = saveAs;
+        
+        // 触发下载
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+    </script>
+</head>
+<body>
+    <noscript>
+        <h2 style="color: #ff4444;">需要启用JavaScript才能自动下载！</h2>
+    </noscript>
+
+    <h1>ShitAPI 数据下载</h1>
+    <p>如果自动下载失败，请手动点击：</p>
+    <button onclick="window.location.href='api-data.json'">
+        点击手动下载数据包
+    </button>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+    </style>
+</body>
+</html>
