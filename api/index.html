@@ -1,56 +1,744 @@
 <!DOCTYPE html>
-<html>
-<head> 
-    <meta charset="utf-8"> 
-    <title>shitAPI-dl</title>
-    <script>
-    window.onload = function() {
-        // 自动下载配置
-        const fileName = "jvav17_114514_ved_抢先体验升级加强修复优化去重甲骨文微软苹果WindowsMac手机电脑官方安全加速版.zip";  // 要下载的文件名
-        const saveAs = "jvav17_114514_ved_抢先体验升级加强修复优化去重甲骨文微软苹果WindowsMac手机电脑官方安全加速版.zip"; // 保存时的默认文件名
-
-        // 创建隐藏下载链接
-        const link = document.createElement('a');
-        link.style.display = 'none';
-        link.href = fileName;
-        link.download = saveAs;
-        
-        // 触发下载
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
-    </script>
-</head>
-<body>
-    <noscript>
-        <h2 style="color: #ff4444;">需要启用JavaScript才能自动下载！</h2>
-    </noscript>
-
-    <h1>ShitAPI 数据下载</h1>
-    <p>如果自动下载失败，请手动点击：</p>
-    <button onclick="window.location.href='jvav17_114514_ved_抢先体验升级加强修复优化去重甲骨文微软苹果WindowsMac手机电脑官方安全加速版.zip'">
-        点击手动下载数据包
-    </button>
-
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Download Station</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --cyber-purple: #bc13fe;
+            --matrix-green: #0f0;
+            --dark-bg: #121212;
+        }
+
+        /* 基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-        }
-        button {
-            padding: 10px 20px;
-            background: #4CAF50;
+            background: var(--dark-bg);
             color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
+            font-family: 'Rajdhani', 'Microsoft YaHei', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(188, 19, 254, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(0, 243, 255, 0.1) 0%, transparent 50%);
         }
-        button:hover {
-            background: #45a049;
+
+        /* 霓虹边框装饰 */
+        .cyber-border {
+            position: fixed;
+            border: 2px solid var(--neon-blue);
+            box-shadow: 0 0 15px var(--neon-blue);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .border-top {
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+        }
+
+        .border-right {
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 2px;
+        }
+
+        .border-bottom {
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+        }
+
+        .border-left {
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 2px;
+        }
+
+        /* 侧边导航菜单 */
+        .cyber-menu {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px 15px;
+            border-radius: 15px;
+            border: 1px solid var(--cyber-purple);
+            box-shadow: 0 0 20px rgba(188, 19, 254, 0.3);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+        }
+
+        .menu-item {
+            margin: 25px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--matrix-green);
+            text-align: center;
+            position: relative;
+        }
+
+        .menu-item i {
+            font-size: 1.8rem;
+        }
+
+        .menu-item::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: var(--neon-blue);
+            transition: width 0.3s ease;
+        }
+
+        .menu-item:hover {
+            color: var(--neon-blue);
+            transform: scale(1.2);
+        }
+
+        .menu-item:hover::after {
+            width: 80%;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            margin-left: 120px;
+            padding: 40px;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .header {
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            background: linear-gradient(90deg, var(--neon-blue), var(--cyber-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+            letter-spacing: 2px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--cyber-purple));
+            border-radius: 3px;
+        }
+
+        /* 下载区域 */
+        .download-section {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            border-radius: 10px;
+            padding: 30px;
+            margin-top: 30px;
+            max-width: 600px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .download-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                45deg,
+                transparent 48%,
+                rgba(0, 243, 255, 0.1) 49%,
+                rgba(0, 243, 255, 0.1) 51%,
+                transparent 52%
+            );
+            background-size: 10px 10px;
+            pointer-events: none;
+        }
+
+        .cyber-button {
+            background: none;
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .cyber-button:hover {
+            box-shadow: 0 0 20px var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
+            transform: translateY(-3px);
+        }
+
+        .cyber-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(0, 243, 255, 0.2),
+                transparent
+            );
+            transition: all 0.5s ease;
+        }
+
+        .cyber-button:hover::before {
+            left: 100%;
+        }
+
+        /* 状态文本 */
+        .status-text {
+            color: var(--matrix-green);
+            font-family: 'Courier New', monospace;
+            margin-top: 15px;
+            text-shadow: 0 0 5px var(--matrix-green);
+        }
+
+        /* 自定义右键菜单 */
+        #custom-context-menu {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid var(--cyber-purple);
+            box-shadow: 0 0 15px var(--neon-blue);
+            color: white;
+            padding: 10px 0;
+            min-width: 180px;
+            border-radius: 5px;
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .context-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .context-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .context-item:hover {
+            background: rgba(0, 243, 255, 0.1);
+            color: var(--neon-blue);
+        }
+
+        .context-separator {
+            height: 1px;
+            background: rgba(0, 243, 255, 0.3);
+            margin: 5px 0;
+        }
+
+        /* 装饰元素 */
+        .floating-icon {
+            position: absolute;
+            opacity: 0.5;
+            animation: float 6s infinite ease-in-out;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .cyber-menu {
+                top: auto;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                padding: 10px 20px;
+            }
+
+            .menu-item {
+                margin: 0 15px;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
         }
     </style>
+</head>
+<body>
+    <!-- 霓虹边框装饰 -->
+    <div class="cyber-border border-top"></div>
+    <div class="cyber-border border-right"></div>
+    <div class="cyber-border border-bottom"></div>
+    <div class="cyber-border border-left"></div>
+
+    <!-- 侧边导航菜单 -->
+    <nav class="cyber-menu">
+        <div class="menu-item" data-section="download" title="下载中心">
+            <i class="fas fa-download"></i>
+        </div>
+        <div class="menu-item" data-section="info" title="系统信息">
+            <i class="fas fa-info-circle"></i>
+        </div>
+        <div class="menu-item" data-section="gallery" title="图片库">
+            <i class="fas fa-images"></i>
+        </div>
+        <div class="menu-item" data-section="settings" title="设置">
+            <i class="fas fa-cog"></i>
+        </div>
+    </nav>
+
+    <!-- 自定义右键菜单 -->
+    <div id="custom-context-menu">
+        <div class="context-item" data-action="refresh">
+            <i class="fas fa-sync-alt"></i>刷新页面
+        </div>
+        <div class="context-separator"></div>
+        <div class="context-item" data-action="download">
+            <i class="fas fa-download"></i>下载文件
+        </div>
+        <div class="context-item" data-action="home">
+            <i class="fas fa-home"></i>返回首页
+        </div>
+        <div class="context-separator"></div>
+        <div class="context-item" data-action="info">
+            <i class="fas fa-info-circle"></i>系统信息
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <div class="header">
+            <h1>NEON shitAPI DOWNLOAD STATION</h1>
+            <p class="status-text">>> 系统初始化完成 | 准备就绪...</p>
+        </div>
+
+        <!-- 下载区 -->
+        <div id="download-section" class="section active">
+            <div class="download-section">
+                <h2><i class="fas fa-file-download"></i> 文件下载</h2>
+                <p>点击下方按钮开始下载最新数据包</p>
+                <button class="cyber-button" id="download-btn">
+                    <i class="fas fa-rocket"></i> 启动下载(未完成)
+                </button>
+                <p class="status-text" id="download-status">
+                    >> 等待下载指令...
+                </p>
+            </div>
+        </div>
+
+        <!-- 系统信息区 -->
+   <div id="info-section" class="section">
+    <div class="download-section">
+      <h2><i class="fas fa-microchip"></i> 系统信息</h2>
+      <div id="system-info">
+        <div class="info-item">
+          <i class="fas fa-desktop"></i>
+          <strong>操作系统:</strong> <span id="os-info">加载中...</span>
+        </div>
+        <div class="info-item">
+          <i class="fas fa-globe"></i>
+          <strong>浏览器:</strong> <span id="browser-info">加载中...</span>
+        </div>
+        <div class="info-item">
+          <i class="fas fa-memory"></i>
+          <strong>内存:</strong> <span id="memory-info">加载中...</span>
+        </div>
+        <div class="info-item">
+          <i class="fas fa-clock"></i>
+          <strong>时间:</strong> <span id="time-info">加载中...</span>
+        </div>
+        <div class="info-item">
+          <i class="fas fa-expand"></i>
+          <strong>分辨率:</strong> <span id="resolution-info">加载中...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 获取操作系统信息
+    function getOSInfo() {
+      var os = navigator.platform;
+      document.getElementById('os-info').textContent = os;
+    }
+
+    // 获取浏览器信息
+    function getBrowserInfo() {
+      var browser = navigator.userAgent;
+      document.getElementById('browser-info').textContent = browser;
+    }
+
+    // 获取系统内存信息
+    function getMemoryInfo() {
+      if (navigator.deviceMemory) {
+        var memory = navigator.deviceMemory + 'GB';
+        document.getElementById('memory-info').textContent = memory;
+      } else {
+        document.getElementById('memory-info').textContent = '无法获取内存信息';
+      }
+    }
+
+    // 获取当前时间
+    function getTimeInfo() {
+      var currentDate = new Date();
+      document.getElementById('time-info').textContent = currentDate.toLocaleString();
+    }
+
+    // 获取浏览器窗口分辨率
+    function getResolutionInfo() {
+      var width = window.innerWidth;
+      var height = window.innerHeight;
+      document.getElementById('resolution-info').textContent = width + 'x' + height;
+    }
+
+    // 在页面加载时获取所有信息
+    window.onload = function() {
+      getOSInfo();
+      getBrowserInfo();
+      getMemoryInfo();
+      getTimeInfo();
+      getResolutionInfo();
+    };
+  </script>
+
+        <!-- 设置区 -->
+        <div id="settings-section" class="section">
+            <div class="download-section">
+                <h2><i class="fas fa-sliders-h"></i> 系统设置</h2>
+                <div class="settings-option">
+                    <label>
+                        <input type="checkbox" id="auto-download" checked>
+                        <span>自动下载</span>
+                    </label>
+                </div>
+                <div class="settings-option">
+                    <label>
+                        <input type="checkbox" id="dark-mode" checked>
+                        <span>暗黑模式</span>
+                    </label>
+                </div>
+                <div class="settings-option">
+                    <label>
+                        <span>霓虹强度</span>
+                        <input type="range" id="neon-intensity" min="0" max="100" value="50">
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 动态装饰元素 -->
+    <div id="dynamic-decorations"></div>
+
+    <script>
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 创建动态装饰元素
+            createDecorations();
+            
+            // 初始化右键菜单
+            initContextMenu();
+            
+            // 初始化侧边菜单
+            initSideMenu();
+            
+            // 初始化下载功能
+            initDownload();
+            
+            // 初始化图片库
+            initGallery();
+            
+            // 自动下载设置
+            if (document.getElementById('auto-download').checked) {
+                setTimeout(triggerDownload, 1500);
+            }
+        });
+
+        // 创建装饰元素
+        function createDecorations() {
+            const container = document.getElementById('dynamic-decorations');
+            const decorTypes = ['✦', '❖', '♢', '⌬', '⧉'];
+            
+            for (let i = 0; i < 15; i++) {
+                const decor = document.createElement('div');
+                decor.className = 'floating-icon';
+                decor.innerHTML = decorTypes[Math.floor(Math.random() * decorTypes.length)];
+                
+                // 随机位置和大小
+                const size = 20 + Math.random() * 30;
+                decor.style.cssText = `
+                    left: ${Math.random() * 100}%;
+                    top: ${Math.random() * 100}%;
+                    font-size: ${size}px;
+                    color: hsla(${Math.random() * 360}, 100%, 70%, 0.7);
+                    animation-delay: ${Math.random() * 5}s;
+                    animation-duration: ${3 + Math.random() * 7}s;
+                `;
+                
+                container.appendChild(decor);
+            }
+        }
+
+        // 初始化右键菜单
+        function initContextMenu() {
+            const ctxMenu = document.getElementById('custom-context-menu');
+            
+            // 显示右键菜单
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                
+                // 计算位置（确保不超出视口）
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                const menuWidth = ctxMenu.offsetWidth;
+                const menuHeight = ctxMenu.offsetHeight;
+                
+                let posX = e.clientX;
+                let posY = e.clientY;
+                
+                if (posX + menuWidth > viewportWidth) {
+                    posX = viewportWidth - menuWidth - 5;
+                }
+                
+                if (posY + menuHeight > viewportHeight) {
+                    posY = viewportHeight - menuHeight - 5;
+                }
+                
+                ctxMenu.style.display = 'block';
+                ctxMenu.style.left = `${posX}px`;
+                ctxMenu.style.top = `${posY}px`;
+            });
+            
+            // 隐藏右键菜单
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('#custom-context-menu') return;
+                ctxMenu.style.display = 'none';
+            });
+            
+            // 右键菜单功能
+            document.querySelectorAll('.context-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const action = this.dataset.action;
+                    
+                    switch(action) {
+                        case 'refresh':
+                            location.reload();
+                            break;
+                        case 'download':
+                            triggerDownload();
+                            break;
+                        case 'home':
+                            showSection('download');
+                            break;
+                        case 'info':
+                            showSection('info');
+                            break;
+                    }
+                    
+                    ctxMenu.style.display = 'none';
+                });
+            });
+        }
+
+        // 初始化侧边菜单
+        function initSideMenu() {
+            document.querySelectorAll('.cyber-menu .menu-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const section = this.dataset.section;
+                    showSection(section);
+                });
+            });
+        }
+
+        // 显示指定区域
+        function showSection(sectionId) {
+            // 隐藏所有区域
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // 显示目标区域
+            const targetSection = document.getElementById(`${sectionId}-section`);
+            if (targetSection) {
+                targetSection.classList.add('active');
+                
+                // 特殊区域初始化
+                if (sectionId === 'info') {
+                    updateSystemInfo();
+                }
+            }
+        }
+
+        // 更新系统信息
+        function updateSystemInfo() {
+            const infoContainer = document.getElementById('system-info');
+            
+            const info = `
+                <div class="info-item">
+                    <i class="fas fa-desktop"></i>
+                    <strong>操作系统:</strong> ${navigator.platform}
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-globe"></i>
+                    <strong>浏览器:</strong> ${navigator.userAgent.split(') ')[0].split('(')[1]}
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-memory"></i>
+                    <strong>内存:</strong> ${(performance.memory.jsHeapSizeLimit / 1024 / 1024).toFixed(2)} MB
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-clock"></i>
+                    <strong>时间:</strong> ${new Date().toLocaleString()}
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-expand"></i>
+                    <strong>分辨率:</strong> ${window.screen.width} × ${window.screen.height}
+                </div>
+            `;
+            
+            infoContainer.innerHTML = info;
+        }
+
+        // 初始化下载功能
+        function initDownload() {
+            const downloadBtn = document.getElementById('download-btn');
+            const statusText = document.getElementById('download-status');
+            
+            downloadBtn.addEventListener('click', triggerDownload);
+            
+            // 模拟下载进度
+            window.simulateDownload = function() {
+                statusText.textContent = ">> 连接服务器...";
+                setTimeout(() => {
+                    statusText.textContent = ">> 验证文件完整性...";
+                    setTimeout(() => {
+                        statusText.textContent = ">> 下载数据 (25%)...";
+                        setTimeout(() => {
+                            statusText.textContent = ">> 下载数据 (75%)...";
+                            setTimeout(() => {
+                                statusText.textContent = ">> 下载完成! 保存文件中...";
+                                setTimeout(() => {
+                                    statusText.textContent = ">> 文件已保存至本地存储";
+                                }, 800);
+                            }, 1000);
+                        }, 800);
+                    }, 600);
+                }, 400);
+            };
+        }
+
+        // 触发下载
+        function triggerDownload() {
+            const statusText = document.getElementById('download-status');
+            statusText.textContent = ">> 开始下载流程...";
+            
+            // 模拟下载进度
+            simulateDownload();
+            
+            // 实际下载功能
+            setTimeout(() => {
+                const link = document.createElement('a');
+                link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(
+                    `NEON DOWNLOAD STATION - 下载时间: ${new Date().toLocaleString()}\n\n` +
+                    '这是一个示例文件，实际应用中应替换为真实文件下载链接。\n' +
+                    '您可以通过修改HTML代码中的链接来实现真实文件下载。'
+                );
+                link.download = `neon-download-${Date.now()}.txt`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // 添加下载完成动画
+                const btn = document.getElementById('download-btn');
+                btn.style.boxShadow = '0 0 30px var(--neon-blue)';
+                setTimeout(() => {
+                    btn.style.boxShadow = '';
+                }, 1000);
+            }, 3000);
+        }
+
+        // 初始化图片库
+        function initGallery() {
+            const galleryContainer = document.getElementById('gallery-container');
+            const imageUrls = [
+                'https://source.unsplash.com/random/300x200/?cyberpunk',
+                'https://source.unsplash.com/random/300x200/?neon',
+                'https://source.unsplash.com/random/300x200/?future',
+                'https://source.unsplash.com/random/300x200/?technology',
+                'https://source.unsplash.com/random/300x200/?scifi',
+                'https://source.unsplash.com/random/300x200/?digital',
+                'https://source.unsplash.com/random/300x200/?matrix',
+                'https://source.unsplash.com/random/300x200/?code'
+            ];
+            
+            imageUrls.forEach(url => {
+                const imgItem = document.createElement('div');
+                imgItem.className = 'gallery-item';
+                imgItem.innerHTML = `
+                    <img src="${url}" alt="Gallery Image">
+                    <div class="img-overlay">
+                        <i class="fas fa-expand"></i>
+                    </div>
+                `;
+                galleryContainer.appendChild(imgItem);
+            });
+        }
+    </script>
 </body>
 </html>
