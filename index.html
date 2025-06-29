@@ -1,253 +1,312 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN" class="scroll-smooth">
 <head>
-    <link rel="stylesheet" type="text/css" href="//api.ecylt.top/css/huli.css">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NB网页 v2.0.1</title>
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            background: linear-gradient(135deg, #ff7a18, #af002d, #3019ff); /* 渐变色背景 */
-            font-family: 'Arial', sans-serif;
-            color: white;
-            overflow: hidden;
-        }
-
-        .time {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            font-size: 20px;
-            z-index: 1000;
-        }
-
-        /* 页面加载时动画效果 */
-        .page-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            opacity: 0; /* 开始时透明 */
-            transform: translateX(-100%); /* 从左侧开始 */
-            transition: transform 1s ease-out, opacity 1s ease-out; /* 滑动和透明度的过渡 */
-        }
-
-        .page-container.loaded {
-            transform: translateX(0); /* 结束时滑动到原位 */
-            opacity: 1; /* 显示内容 */
-        }
-
-        /* 动态窗口 */
-        .info-window {
-            background: rgba(0, 0, 0, 0.6);
-            padding: 20px;
-            margin: 10px;
-            border-radius: 15px;
-            width: 200px;
-            text-align: center;
-            opacity: 0;
-            transform: scale(0.8);
-            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-        }
-
-        .info-window.show {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .info-window:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.05);
-        }
-
-        .info-window h3 {
-            font-size: 18px;
-        }
-
-        .info-window p {
-            font-size: 14px;
-        }
-
-        /* 自定义右键菜单 */
-        .custom-menu {
-            position: absolute;
-            background-color: #333;
-            color: white;
-            border-radius: 5px;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
-            display: none;
-            z-index: 1000;
-            padding: 10px;
-            width: 200px;
-        }
-
-        .custom-menu-item {
-            padding: 10px;
-            cursor: pointer;
-            border-bottom: 1px solid #444;
-        }
-
-        .custom-menu-item:last-child {
-            border-bottom: none;
-        }
-
-        .custom-menu-item:hover {
-            background-color: #555;
-        }
-
-        /* 右上角的欢迎窗口 */
-        .welcome-window {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background-color: rgba(0, 0, 0, 0.6);
-            padding: 15px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            opacity: 0;
-            transform: scale(0.8);
-            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-            z-index: 1000;
-        }
-
-        .welcome-window.show {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .welcome-window img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-
-        .welcome-window p {
-            font-size: 16px;
-            color: white;
-        }
-
-        /* 粒子效果 */
-        .particle {
-            position: absolute;
-            border-radius: 50%;
-            background-color: #ff0066;
-            pointer-events: none;
-            animation: particleEffect 0.5s ease-out forwards;
-        }
-
-        @keyframes particleEffect {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(2); opacity: 0; }
-        }
-
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trusler's Modern Website</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3498db',     // 明亮蓝色作为主色调
+            secondary: '#2ecc71',   // 清新绿色作为辅助色
+            accent: '#e74c3c',      // 强调色
+            dark: '#2c3e50',        // 深色文本
+            light: '#ecf0f1',       // 浅色背景
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .text-shadow {
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .card-hover {
+        transition: all 0.3s ease;
+      }
+      .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+      .btn-glow {
+        box-shadow: 0 0 15px rgba(52, 152, 219, 0.5);
+      }
+      .bg-grid {
+        background-image: linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+                          linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+        background-size: 20px 20px;
+      }
+    }
+  </style>
 </head>
-<body>
-    <img id="follow-img" src="//api.ecylt.top/images/huli.gif"/>
-<script src="//api.ecylt.top/js/huli.js"></script>
-    <!-- 左上角时间显示 -->
-    <div class="time" id="time"></div>
-
-    <div class="page-container" id="page-container">
-        <!-- 系统信息窗口 -->
-        <div class="info-window" id="os-info">
-            <h3>操作系统</h3>
-            <p id="os-detail">加载中...</p>
+<body class="font-sans bg-light text-dark min-h-screen transition-colors duration-300">
+  <!-- 主容器 -->
+  <div class="relative">
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-sm shadow-sm transition-all duration-300 z-50">
+      <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+        <!-- 左上角头像和名字 -->
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="window.location.href='https://space.bilibili.com/399924001'">
+          <img src="https://huangplayer-trusler.github.io/pic/tx.jpg" alt="Trusler's Avatar" class="w-10 h-10 rounded-full border-2 border-primary">
+          <h1 class="text-lg font-bold text-dark hover:text-primary transition-colors">Trusler</h1>
         </div>
-        <div class="info-window" id="screen-info">
-            <h3>屏幕分辨率</h3>
-            <p id="screen-detail">加载中...</p>
+
+        <!-- 右上角主题切换 -->
+        <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <i class="fa fa-moon-o dark:hidden text-dark"></i>
+          <i class="fa fa-sun-o hidden dark:inline-block text-light"></i>
+        </button>
+      </div>
+    </nav>
+
+    <!-- 英雄区域 -->
+    <header class="pt-24 pb-16 md:pt-32 md:pb-24 bg-gradient-to-br from-primary/5 to-secondary/5 bg-grid">
+      <div class="container mx-auto px-4 text-center">
+        <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-bold text-dark mb-4 leading-tight">
+          探索我的<span class="text-primary font-extrabold">创意工具</span>
+        </h1>
+        <p class="text-[clamp(1rem,2vw,1.25rem)] text-gray-600 max-w-2xl mx-auto mb-8">
+          简洁实用的工具集合，帮助你更高效地处理音乐、图像和视频内容
+        </p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+          <a href="https://huangplayer-trusler.github.io/music-unlock" class="px-8 py-3 bg-primary text-white rounded-lg font-medium btn-glow hover:bg-primary/90 transition-all shadow-lg">
+            <i class="fa fa-music mr-2"></i>音乐解密工具
+          </a>
+          <a href="https://huangplayer-trusler.github.io/ptcv" class="px-8 py-3 bg-white text-primary border border-primary rounded-lg font-medium hover:bg-primary/5 transition-all shadow-md">
+            <i class="fa fa-picture-o mr-2"></i>图像视频处理
+          </a>
         </div>
-        <div class="info-window" id="browser-info">
-            <h3>浏览器</h3>
-            <p id="browser-detail">加载中...</p>
+      </div>
+    </header>
+
+    <!-- 主要内容区 -->
+    <main class="container mx-auto px-4 pb-16">
+      <!-- 北京时间显示 -->
+      <div class="max-w-md mx-auto mb-16 text-center">
+        <div class="time-container relative inline-block">
+          <div id="beijing-time" class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-primary mb-2">
+            加载中...
+          </div>
+          <div class="time-tooltip absolute bottom-full left-1/2 -translate-x-1/2 mt-3 w-80 bg-white p-4 rounded-lg shadow-lg z-10 opacity-0 invisible transition-all duration-300">
+            <div class="bg-primary/5 p-3 rounded mb-2">
+              <h3 class="font-bold text-primary mb-1">详细时间信息</h3>
+              <p id="unix-timestamp">Unix时间戳: 加载中...</p>
+            </div>
+            <div class="bg-gray-50 p-3 rounded mb-2">
+              <h3 class="font-bold text-gray-700 mb-1">美国时间</h3>
+              <p id="us-time">加载中...</p>
+            </div>
+            <div class="bg-secondary/5 p-3 rounded">
+              <h3 class="font-bold text-secondary mb-1">其他信息</h3>
+              <p id="additional-info">加载中...</p>
+            </div>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- 欢迎窗口（右上角） -->
-    <div class="welcome-window" id="welcome-window">
-        <img src="https://qlogo4.store.qq.com/qzone/3483585417/3483585417/100?1718284935.jpg" alt="头像">
-        <p>欢迎来到我的网站</p>
-    </div>
+      <!-- 工具卡片区域 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- 音乐解密卡片 -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover">
+          <div class="h-48 bg-secondary/10 flex items-center justify-center">
+            <i class="fa fa-music text-5xl text-secondary"></i>
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold mb-2 text-dark">音乐解密工具</h3>
+            <p class="text-gray-600 mb-4">支持解密各大音乐平台的加密音乐文件，轻松获取无损音质</p>
+            <a href="https://huangplayer-trusler.github.io/music-unlock" class="inline-block px-4 py-2 bg-secondary/10 text-secondary rounded-lg font-medium hover:bg-secondary/20 transition-colors">
+              开始解密 <i class="fa fa-arrow-right ml-1"></i>
+            </a>
+          </div>
+        </div>
 
-    <!-- 自定义右键菜单 -->
-    <div class="custom-menu" id="customMenu">
-        <div class="custom-menu-item" id="refreshPage">刷新网页</div>
-    </div>
+        <!-- 图像视频处理卡片 -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover">
+          <div class="h-48 bg-accent/10 flex items-center justify-center">
+            <i class="fa fa-picture-o text-5xl text-accent"></i>
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold mb-2 text-dark">图像视频处理</h3>
+            <p class="text-gray-600 mb-4">一站式网页工具，支持图片编辑、视频转换、特效添加等多种功能</p>
+            <a href="https://huangplayer-trusler.github.io/ptcv" class="inline-block px-4 py-2 bg-accent/10 text-accent rounded-lg font-medium hover:bg-accent/20 transition-colors">
+              立即使用 <i class="fa fa-arrow-right ml-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
 
-    <script>
-        // 页面加载完成后触发动画
-        window.onload = function() {
-            document.getElementById('page-container').classList.add('loaded');
-            document.getElementById('welcome-window').classList.add('show');
-            setTimeout(() => {
-                document.querySelectorAll('.info-window').forEach(window => {
-                    window.classList.add('show');
-                });
-            }, 1000); // 延迟显示
-        };
+      <!-- 特点介绍 -->
+      <div class="mt-20 max-w-5xl mx-auto">
+        <h2 class="text-3xl font-bold text-center mb-12 text-dark">为什么选择我的工具</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div class="text-center">
+            <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fa fa-lightbulb-o text-2xl text-primary"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2 text-dark">简洁易用</h3>
+            <p class="text-gray-600">无需复杂操作，直观的界面设计让每个人都能快速上手</p>
+          </div>
+          <div class="text-center">
+            <div class="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fa fa-bolt text-2xl text-secondary"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2 text-dark">高效快速</h3>
+            <p class="text-gray-600">优化的算法和架构，确保工具运行流畅，处理速度快</p>
+          </div>
+          <div class="text-center">
+            <div class="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fa fa-globe text-2xl text-accent"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2 text-dark">跨平台</h3>
+            <p class="text-gray-600">支持各种设备和浏览器，随时随地使用你的工具</p>
+          </div>
+        </div>
+      </div>
+    </main>
 
-        // 更新系统时间
-        function updateTime() {
-            const timeElement = document.getElementById('time');
-            const now = new Date();
-            timeElement.textContent = now.toLocaleTimeString();
-        }
-        setInterval(updateTime, 1000);
-        updateTime(); // 初始化时间显示
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white py-12">
+      <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div class="mb-6 md:mb-0">
+            <div class="flex items-center space-x-3 mb-2">
+              <img src="https://huangplayer-trusler.github.io/pic/tx.jpg" alt="Trusler's Avatar" class="w-8 h-8 rounded-full border-2 border-white">
+              <h2 class="text-lg font-bold">Trusler</h2>
+            </div>
+            <p class="text-gray-400">创意工具开发者</p>
+          </div>
+          <div class="flex space-x-6">
+            <a href="https://space.bilibili.com/399924001" class="text-white hover:text-primary transition-colors"><i class="fa fa-bilibili text-xl"></i></a>
+            <a href="#" class="text-white hover:text-primary transition-colors"><i class="fa fa-github text-xl"></i></a>
+            <a href="#" class="text-white hover:text-primary transition-colors"><i class="fa fa-twitter text-xl"></i></a>
+          </div>
+        </div>
+        <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+          <p>© 2025 Trusler. 保留所有权利。</p>
+        </div>
+      </div>
+    </footer>
+  </div>
 
-        // 更新屏幕分辨率
-        function updateResolution() {
-            const screenElement = document.getElementById('screen-detail');
-            screenElement.textContent = `${window.innerWidth} x ${window.innerHeight}`;
-        }
-        window.addEventListener('resize', updateResolution);
-        updateResolution(); // 初始化屏幕分辨率
+  <!-- JavaScript -->
+  <script>
+    // 主题切换功能
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
 
-        // 获取浏览器信息
-        function getBrowserInfo() {
-            const browserElement = document.getElementById('browser-detail');
-            browserElement.textContent = navigator.userAgent;
-        }
-        getBrowserInfo();
+    // 检查本地存储中的主题设置
+    if (localStorage.getItem('theme') === 'dark' || 
+        (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      htmlElement.classList.add('dark');
+      document.body.classList.add('bg-dark', 'text-light');
+    } else {
+      htmlElement.classList.remove('dark');
+      document.body.classList.remove('bg-dark', 'text-light');
+    }
 
-        // 获取操作系统信息
-        function getOSInfo() {
-            const osElement = document.getElementById('os-detail');
-            osElement.textContent = navigator.platform;
-        }
-        getOSInfo();
+    themeToggle.addEventListener('click', () => {
+      if (htmlElement.classList.contains('dark')) {
+        htmlElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      } else {
+        htmlElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      }
+    });
 
-        // 显示右键菜单
-        const customMenu = document.getElementById('customMenu');
-        window.addEventListener('contextmenu', function(e) {
-            e.preventDefault();  // 禁用默认右键菜单
+    // 北京时间显示功能
+    function updateTime() {
+      const now = new Date();
+      const beijingTimeElement = document.getElementById('beijing-time');
+      const unixTimestampElement = document.getElementById('unix-timestamp');
+      const usTimeElement = document.getElementById('us-time');
+      const additionalInfoElement = document.getElementById('additional-info');
 
-            const xPos = e.pageX;
-            const yPos = e.pageY;
-            customMenu.style.left = `${xPos}px`;
-            customMenu.style.top = `${yPos}px`;
-            customMenu.style.display = 'block';
-        });
+      // 北京时间 (UTC+8)
+      const beijingTime = now.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZone: 'Asia/Shanghai'
+      });
+      beijingTimeElement.textContent = beijingTime;
 
-        // 点击页面空白处关闭右键菜单
-        window.addEventListener('click', function(e) {
-            if (!customMenu.contains(e.target)) {
-                customMenu.style.display = 'none';
-            }
-        });
+      // Unix时间戳
+      const unixTimestamp = Math.floor(now.getTime() / 1000);
+      unixTimestampElement.textContent = `Unix时间戳: ${unixTimestamp}`;
 
-        // 刷新网页
-        document.getElementById('refreshPage').addEventListener('click', function() {
-            location.reload();
-            customMenu.style.display = 'none';  // 隐藏菜单
-        });
-    </script>
+      // 美国时间 (以纽约为例，UTC-4/UTC-5)
+      const usTime = now.toLocaleString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZone: 'America/New_York',
+        hour12: true
+      });
+      usTimeElement.textContent = `美国东部时间: ${usTime}`;
+
+      // 其他信息
+      const dayOfWeek = now.toLocaleString('zh-CN', { weekday: 'long' });
+      const season = getSeason(now.getMonth() + 1); // 月份从0开始，所以+1
+      additionalInfoElement.textContent = `星期: ${dayOfWeek} | 季节: ${season} | 时区: UTC+8`;
+    }
+
+    // 获取季节
+    function getSeason(month) {
+      if (month >= 3 && month <= 5) return '春季';
+      if (month >= 6 && month <= 8) return '夏季';
+      if (month >= 9 && month <= 11) return '秋季';
+      return '冬季';
+    }
+
+    // 时间提示框交互
+    const timeContainer = document.querySelector('.time-container');
+    const timeTooltip = document.querySelector('.time-tooltip');
+    let tooltipTimer;
+
+    timeContainer.addEventListener('mouseenter', () => {
+      tooltipTimer = setTimeout(() => {
+        timeTooltip.classList.remove('opacity-0', 'invisible');
+      }, 500); // 0.5秒后显示
+    });
+
+    timeContainer.addEventListener('mouseleave', () => {
+      clearTimeout(tooltipTimer);
+      timeTooltip.classList.add('opacity-0', 'invisible');
+    });
+
+    // 初始调用和定时更新
+    updateTime();
+    setInterval(updateTime, 1000);
+
+    // 导航栏滚动效果
+    window.addEventListener('scroll', () => {
+      const nav = document.querySelector('nav');
+      if (window.scrollY > 20) {
+        nav.classList.add('py-2', 'shadow');
+        nav.classList.remove('py-3', 'shadow-sm');
+      } else {
+        nav.classList.add('py-3', 'shadow-sm');
+        nav.classList.remove('py-2', 'shadow');
+      }
+    });
+  </script>
 </body>
 </html>
