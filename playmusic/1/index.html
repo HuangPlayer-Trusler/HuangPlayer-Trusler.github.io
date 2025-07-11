@@ -85,18 +85,29 @@
         height: 100%;
         z-index: -1;
       }
-    }
-    
-    @keyframes equalize {
-      0%, 100% { height: 4px; }
-      25% { height: 16px; }
-      50% { height: 10px; }
-      75% { height: 14px; }
-    }
-    
-    @keyframes rotate {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
+      .loading-spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: theme('colors.primary');
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        margin-right: 8px;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      @keyframes equalize {
+        0%, 100% { height: 4px; }
+        25% { height: 16px; }
+        50% { height: 10px; }
+        75% { height: 14px; }
+      }
+      @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
     }
   </style>
 </head>
@@ -115,6 +126,13 @@
           </div>
           <div class="absolute inset-0 flex items-center justify-center">
             <div class="w-6 h-6 rounded-full bg-white border-8 border-dark z-10"></div>
+          </div>
+          <!-- 加载指示器 -->
+          <div id="loadingIndicator" class="absolute inset-0 bg-dark/60 flex items-center justify-center hidden">
+            <div class="flex flex-col items-center">
+              <div class="loading-spinner"></div>
+              <span class="text-white/80 mt-2">加载中...</span>
+            </div>
           </div>
         </div>
         <!-- 音频可视化效果 -->
@@ -148,6 +166,8 @@
             <div id="progressBar" class="h-full bg-primary w-0 progress-bar relative">
               <div class="progress-thumb absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg"></div>
             </div>
+            <!-- 缓冲进度 -->
+            <div id="bufferBar" class="absolute top-0 left-0 h-full bg-white/20 w-0"></div>
           </div>
           <span id="totalTime">0:00</span>
         </div>
@@ -189,7 +209,7 @@
       <div class="lyric-container h-[320px] overflow-hidden relative">
         <div id="lyrics" class="text-center space-y-3 py-8 transition-all duration-500 ease-in-out">
           <div class="text-white/50 text-lg italic">
-            加载中...
+            请播放歌曲查看歌词
           </div>
         </div>
       </div>
@@ -244,6 +264,9 @@
   </audio>
 
   <script>
+    // 固定URL前缀
+    const BASE_URL = 'https://huangplayer-trusler.github.io/playmusic/';
+    
     // 获取DOM元素
     const audioPlayer = document.getElementById('audioPlayer');
     const playPauseBtn = document.getElementById('playPauseBtn');
@@ -271,16 +294,19 @@
     const miniHeartBtn = document.getElementById('miniHeartBtn');
     const shareBtn = document.getElementById('shareBtn');
     const playlistBtn = document.getElementById('playlistBtn');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const bufferBar = document.getElementById('bufferBar');
     
     // 歌曲列表（您可以在此处添加自己的歌曲）
     const songs = [
-       {
-         title: "THE FEAR (无惧)",
-         artist: "三角洲行动、Charlotte Churchman",
-         cover: "https:\\\\huangplayer-trusler.github.io\\playmusic\\1\\001.png",
-         file: "https:\\\\huangplayer-trusler.github.io\\playmusic\\1\\001.mp3",
-         lrc: "https:\\\\huangplayer-trusler.github.io\\playmusic\\1\\001.lrc"
-       }
+      // 示例歌曲结构（请删除此示例并添加您自己的歌曲）
+      {
+        title: "THE FEAR (无惧)",
+        artist: "三角洲行动、Charlotte Churchman",
+        cover: "\\1\\001.png",
+        file: "\\1\\001.mp3",
+        lrc: "\\1\\001.lrc"
+      }
     ];
     
     let currentSongIndex = 0;
@@ -288,6 +314,7 @@
     let isRepeat = false;
     let currentLyricIndex = 0;
     let isDragging = false;
+    let isLoading = false;
     
     // 解析LRC歌词
     function parseLrc(lrcText) {
@@ -346,6 +373,31 @@
       }
     }
     
+    // 显示加载指示器
+    function showLoading() {
+      isLoading = true;
+      loadingIndicator.classList.remove('hidden');
+    }
+    
+    // 隐藏加载指示器
+    function hideLoading() {
+      isLoading = false;
+      loadingIndicator.classList.add('hidden');
+    }
+    
+    // 更新缓冲进度
+    function updateBufferProgress() {
+      if (audioPlayer.buffered.length > 0) {
+        const bufferedEnd = audioPlayer.buffered.end(audioPlayer.buffered.length - 1);
+        const duration = audioPlayer.duration;
+        
+        if (duration > 0) {
+          const loadPercentage = (bufferedEnd / duration) * 100;
+          bufferBar.style.width = `${loadPercentage}%`;
+        }
+      }
+    }
+    
     // 初始化播放器
     async function initPlayer() {
       if (songs.length > 0) {
@@ -357,6 +409,21 @@
       // 音频元数据加载完成后更新总时长
       audioPlayer.addEventListener('loadedmetadata', () => {
         updateTotalTime();
+        hideLoading();
+      });
+      
+      // 音频缓冲事件
+      audioPlayer.addEventListener('progress', updateBufferProgress);
+      
+      // 音频等待事件
+      audioPlayer.addEventListener('waiting', () => {
+        if (audioPlayer.paused) return;
+        showLoading();
+      });
+      
+      // 音频可播放事件
+      audioPlayer.addEventListener('canplay', () => {
+        hideLoading();
       });
       
       // 音频播放进度更新
@@ -427,26 +494,35 @@
         const song = songs[index];
         
         // 显示加载状态
+        showLoading();
         lyricsContainer.innerHTML = '<div class="text-white/50 text-lg italic">加载歌词中...</div>';
         
+        // 构建完整URL
+        const fullAudioUrl = BASE_URL + song.file;
+        const fullCoverUrl = BASE_URL + song.cover;
+        const fullLrcUrl = song.lrc ? BASE_URL + song.lrc : null;
+        
         // 加载音频和封面
-        audioPlayer.src = song.file;
-        albumCover.src = song.cover;
+        audioPlayer.src = fullAudioUrl;
+        albumCover.src = fullCoverUrl;
         albumCover.alt = `${song.title}专辑封面`;
         songTitle.textContent = song.title;
         songArtist.textContent = song.artist;
         
         // 更新迷你播放器信息
-        miniAlbumCover.src = song.cover;
+        miniAlbumCover.src = fullCoverUrl;
         miniSongTitle.textContent = song.title;
         miniSongArtist.textContent = song.artist;
         
         // 更新背景模糊图
-        blurBg.style.backgroundImage = `url(${song.cover})`;
+        blurBg.style.backgroundImage = `url(${fullCoverUrl})`;
+        
+        // 重置缓冲进度
+        bufferBar.style.width = '0%';
         
         // 加载并解析LRC歌词
-        if (song.lrc) {
-          const lrcText = await loadLrcFromUrl(song.lrc);
+        if (fullLrcUrl) {
+          const lrcText = await loadLrcFromUrl(fullLrcUrl);
           if (lrcText) {
             song.parsedLyrics = parseLrc(lrcText);
             updateLyricDisplay(song.parsedLyrics);
@@ -659,6 +735,8 @@
       }
       
       if (audioPlayer.paused) {
+        if (isLoading) return; // 正在加载时不播放
+        
         audioPlayer.play();
         playPauseBtn.innerHTML = '<i class="fa fa-pause text-white text-xl"></i>';
         miniPlayPauseBtn.innerHTML = '<i class="fa fa-pause text-white"></i>';
