@@ -1,0 +1,59 @@
+@layer utilities {
+  .content-auto {
+    content-visibility: auto;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+  }
+  
+  .lyric-line {
+    padding: 0.5rem 0;
+    color: rgba(255, 255, 255, 0.6);
+    transition: all 0.3s ease;
+  }
+  
+  .lyric-line.active {
+    color: white;
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+  
+  .rotate {
+    animation: rotate 20s linear infinite;
+  }
+  
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+}
+
+:root {
+  --primary: #1DB954;
+  --dark: #121212;
+  --darker: #0A0A0A;
+  --dark-gray: #1E1E1E;
+}
+
+body {
+  background-color: var(--dark);
+  color: white;
+}
+
+#progress-bar, #volume-bar {
+  cursor: pointer;
+}
+
+#album-cover.playing {
+  animation: rotate 20s linear infinite;
+}

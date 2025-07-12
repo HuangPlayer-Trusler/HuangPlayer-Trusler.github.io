@@ -3,910 +3,137 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trusler's MusicPlayer - 001</title>
+  <title>音乐播放器</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-  
-  <!-- Tailwind 配置 -->
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#FF2D55', // Apple Music 红色
-            dark: '#161617',
-            'dark-light': '#2C2C2E',
-            'gray-light': '#F5F5F7',
-          },
-          fontFamily: {
-            inter: ['Inter', 'sans-serif'],
-          },
-        },
-      }
-    }
-  </script>
-  
-  <style type="text/tailwindcss">
-    @layer utilities {
-      .content-auto {
-        content-visibility: auto;
-      }
-      .music-visualizer {
-        display: flex;
-        align-items: flex-end;
-        gap: 2px;
-        height: 20px;
-      }
-      .music-bar {
-        width: 3px;
-        background-color: theme('colors.primary');
-        border-radius: 1px;
-        animation: equalize 1s infinite;
-      }
-      .player-shadow {
-        box-shadow: 0 10px 50px -12px rgba(255, 45, 85, 0.2);
-      }
-      .album-rotate {
-        animation: rotate 20s linear infinite;
-        animation-play-state: paused;
-      }
-      .playing .album-rotate {
-        animation-play-state: running;
-      }
-      .progress-thumb {
-        transform: scale(0);
-        transition: transform 0.2s ease;
-      }
-      .progress-bar:hover .progress-thumb {
-        transform: scale(1);
-      }
-      .lyric-line {
-        transition: all 0.5s ease;
-        opacity: 0.6;
-        transform: translateY(0);
-        cursor: pointer;
-      }
-      .lyric-line.active {
-        opacity: 1;
-        color: theme('colors.primary');
-        transform: translateY(0);
-        font-weight: 500;
-        font-size: 1.1rem;
-      }
-      .lyric-container {
-        mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
-        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
-      }
-      .blur-bg {
-        filter: blur(40px);
-        opacity: 0.2;
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        z-index: -1;
-      }
-      .loading-spinner {
-        width: 20px;
-        height: 20px;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        border-radius: 50%;
-        border-top-color: theme('colors.primary');
-        animation: spin 1s linear infinite;
-        display: inline-block;
-        margin-right: 8px;
-      }
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-      @keyframes equalize {
-        0%, 100% { height: 4px; }
-        25% { height: 16px; }
-        50% { height: 10px; }
-        75% { height: 14px; }
-      }
-      @keyframes rotate {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-dark text-white font-inter min-h-screen flex flex-col overflow-x-hidden relative">
-  <!-- 背景模糊效果 -->
-  <div id="blurBg" class="blur-bg"></div>
-  
-  <!-- 主要内容区 -->
-  <main class="flex-grow container mx-auto px-4 py-8 flex flex-col md:flex-row items-center justify-center gap-8">
-    <!-- 专辑封面区域 -->
-    <div class="flex flex-col items-center md:w-1/2">
-      <div class="relative mb-6 player-shadow">
-        <div class="w-72 h-72 rounded-full overflow-hidden bg-dark-light album-container flex items-center justify-center">
-          <div class="absolute w-64 h-64 rounded-full overflow-hidden">
-            <img id="albumCover" src="" alt="专辑封面" class="w-full h-full object-cover album-rotate">
+<body class="bg-dark text-white font-sans antialiased overflow-hidden">
+  <!-- 错误提示 -->
+  <div id="error-message" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg hidden z-50">
+    <i class="fa fa-exclamation-circle mr-2"></i>
+    <span id="error-text">加载失败</span>
+  </div>
+
+  <div class="flex flex-col h-screen">
+    <!-- 顶部导航栏 -->
+    <header class="bg-dark-gray border-b border-gray-700 px-6 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-4">
+        <button id="back-btn" class="text-gray-400 hover:text-white transition-colors">
+          <i class="fa fa-arrow-left"></i>
+        </button>
+        <h1 class="text-xl font-bold">音乐播放器</h1>
+      </div>
+      <div class="flex items-center space-x-4">
+        <button class="text-gray-400 hover:text-white transition-colors">
+          <i class="fa fa-search"></i>
+        </button>
+        <button class="text-gray-400 hover:text-white transition-colors">
+          <i class="fa fa-heart-o"></i>
+        </button>
+        <button class="text-gray-400 hover:text-white transition-colors">
+          <i class="fa fa-ellipsis-h"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- 主要内容区域 -->
+    <main class="flex-grow flex flex-col md:flex-row">
+      <!-- 左侧：专辑信息和控制区 -->
+      <section class="w-full md:w-1/3 bg-darker p-6 flex flex-col items-center justify-center border-r border-gray-800">
+        <!-- 专辑封面 -->
+        <div class="w-full max-w-md aspect-square rounded-lg overflow-hidden shadow-2xl mb-8 relative group">
+          <img id="album-cover" src="cover.jpg" alt="专辑封面" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+        </div>
+
+        <!-- 歌曲信息 -->
+        <div class="w-full max-w-md text-center mb-8">
+          <h2 id="song-title" class="text-2xl font-bold mb-2 truncate">歌曲标题</h2>
+          <p id="artist" class="text-gray-400 text-lg mb-1 truncate">艺术家名称</p>
+          <p id="album" class="text-gray-500 text-sm">专辑名称</p>
+        </div>
+
+        <!-- 进度条 -->
+        <div class="w-full max-w-md mb-6">
+          <div class="flex justify-between text-xs text-gray-400 mb-1">
+            <span id="current-time">0:00</span>
+            <span id="total-time">0:00</span>
           </div>
-          <div class="absolute inset-0 flex items-center justify-center">
-            <div class="w-6 h-6 rounded-full bg-white border-8 border-dark z-10"></div>
+          <div class="relative h-1.5 bg-gray-700 rounded-full overflow-hidden">
+            <div id="progress-bar" class="absolute top-0 left-0 h-full bg-primary rounded-full transition-all duration-100" style="width: 0%"></div>
           </div>
-          <!-- 加载指示器 -->
-          <div id="loadingIndicator" class="absolute inset-0 bg-dark/60 flex items-center justify-center hidden">
-            <div class="flex flex-col items-center">
-              <div class="loading-spinner"></div>
-              <span class="text-white/80 mt-2">加载中...</span>
+        </div>
+
+        <!-- 控制按钮 -->
+        <div class="w-full max-w-md flex justify-between items-center mb-8">
+          <button id="shuffle-btn" class="w-10 h-10 flex items-center justify-center rounded-full text-gray-400 hover:text-white hover:bg-gray-700 transition-all">
+            <i class="fa fa-random"></i>
+          </button>
+          <button id="prev-btn" class="w-10 h-10 flex items-center justify-center rounded-full text-gray-400 hover:text-white hover:bg-gray-700 transition-all">
+            <i class="fa fa-step-backward"></i>
+          </button>
+          <button id="play-pause-btn" class="w-14 h-14 flex items-center justify-center rounded-full bg-primary text-white hover:bg-primary/90 transition-all transform hover:scale-105 shadow-lg shadow-primary/20">
+            <i class="fa fa-play"></i>
+          </button>
+          <button id="next-btn" class="w-10 h-10 flex items-center justify-center rounded-full text-gray-400 hover:text-white hover:bg-gray-700 transition-all">
+            <i class="fa fa-step-forward"></i>
+          </button>
+          <button id="repeat-btn" class="w-10 h-10 flex items-center justify-center rounded-full text-gray-400 hover:text-white hover:bg-gray-700 transition-all">
+            <i class="fa fa-repeat"></i>
+          </button>
+        </div>
+
+        <!-- 音量控制 -->
+        <div class="w-full max-w-md flex items-center">
+          <i class="fa fa-volume-down text-gray-400 mr-3"></i>
+          <div class="relative flex-grow h-1.5 bg-gray-700 rounded-full overflow-hidden">
+            <div id="volume-bar" class="absolute top-0 left-0 h-full bg-gray-400 rounded-full transition-all duration-100" style="width: 70%"></div>
+          </div>
+          <i class="fa fa-volume-up text-gray-400 ml-3"></i>
+        </div>
+      </section>
+
+      <!-- 右侧：歌词区域 -->
+      <section class="w-full md:w-2/3 bg-dark p-6 overflow-hidden relative">
+        <div class="absolute inset-0 bg-[url('cover.jpg')] bg-cover bg-center opacity-5 blur-3xl"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-dark via-dark/80 to-dark"></div>
+        
+        <div class="relative h-full flex flex-col">
+          <h2 class="text-xl font-bold mb-6">歌词</h2>
+          
+          <div id="lyrics-container" class="flex-grow overflow-y-auto pr-2 custom-scrollbar">
+            <div class="space-y-4 text-center">
+              <p class="text-gray-400 text-lg">加载歌词中...</p>
             </div>
           </div>
         </div>
-        <!-- 音频可视化效果 -->
-        <div class="absolute bottom-4 left-0 right-0 flex items-center justify-center">
-          <div class="music-visualizer" id="audioVisualizer">
-            <div class="music-bar" style="animation-delay: 0ms"></div>
-            <div class="music-bar" style="animation-delay: 100ms"></div>
-            <div class="music-bar" style="animation-delay: 200ms"></div>
-            <div class="music-bar" style="animation-delay: 300ms"></div>
-            <div class="music-bar" style="animation-delay: 400ms"></div>
-            <div class="music-bar" style="animation-delay: 500ms"></div>
-            <div class="music-bar" style="animation-delay: 600ms"></div>
-            <div class="music-bar" style="animation-delay: 700ms"></div>
-            <div class="music-bar" style="animation-delay: 800ms"></div>
-            <div class="music-bar" style="animation-delay: 900ms"></div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- 歌曲信息 -->
-      <div class="text-center mb-4">
-        <h1 id="songTitle" class="text-2xl font-bold mb-1">未加载歌曲</h1>
-        <p id="songArtist" class="text-lg text-white/70">请添加歌曲</p>
-      </div>
-      
-      <!-- 进度条 -->
-      <div class="w-full max-w-md mb-6">
-        <div class="flex items-center justify-center gap-2 text-sm text-white/60">
-          <span id="currentTime">0:00</span>
-          <div class="w-full h-1 bg-white/10 rounded-full overflow-hidden cursor-pointer" id="progressContainer">
-            <div id="progressBar" class="h-full bg-primary w-0 progress-bar relative">
-              <div class="progress-thumb absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg"></div>
-            </div>
-            <!-- 缓冲进度 -->
-            <div id="bufferBar" class="absolute top-0 left-0 h-full bg-white/20 w-0"></div>
-          </div>
-          <span id="totalTime">0:00</span>
-        </div>
-      </div>
-      
-      <!-- 播放控制按钮 -->
-      <div class="flex justify-center gap-6 items-center mb-4">
-        <button id="shuffleBtn" class="p-3 rounded-full hover:bg-white/10 transition-colors">
-          <i class="fa fa-random text-white/60"></i>
-        </button>
-        <button id="prevBtn" class="p-3 rounded-full hover:bg-white/10 transition-colors">
-          <i class="fa fa-step-backward text-white/80"></i>
-        </button>
-        <button id="playPauseBtn" class="w-16 h-16 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/20 transition-transform hover:scale-105">
-          <i class="fa fa-play text-white text-xl"></i>
-        </button>
-        <button id="nextBtn" class="p-3 rounded-full hover:bg-white/10 transition-colors">
-          <i class="fa fa-step-forward text-white/80"></i>
-        </button>
-        <button id="repeatBtn" class="p-3 rounded-full hover:bg-white/10 transition-colors">
-          <i class="fa fa-repeat text-white/60"></i>
-        </button>
-      </div>
-    </div>
-    
-    <!-- 歌词区域 -->
-    <div class="w-full md:w-1/2 bg-dark-light/30 backdrop-blur-md rounded-xl p-6 h-[400px] player-shadow">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-semibold">歌词</h2>
-        <div class="flex gap-3">
-          <button id="heartBtn" class="p-2 rounded-full hover:bg-white/10 transition-colors">
-            <i class="fa fa-heart-o text-white/60"></i>
-          </button>
-          <button id="shareBtn" class="p-2 rounded-full hover:bg-white/10 transition-colors">
-            <i class="fa fa-share-alt text-white/60"></i>
-          </button>
-        </div>
-      </div>
-      <div class="lyric-container h-[320px] overflow-hidden relative">
-        <div id="lyrics" class="text-center space-y-3 py-8 transition-all duration-500 ease-in-out">
-          <div class="text-white/50 text-lg italic">
-            请播放歌曲查看歌词
-          </div>
-        </div>
-      </div>
-    </div>
-  </main>
+      </section>
+    </main>
 
-  <!-- 底部播放条 -->
-  <footer class="bg-dark-light/80 backdrop-blur-md border-t border-white/5 py-3 sticky bottom-0">
-    <div class="container mx-auto px-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
-            <img id="miniAlbumCover" src="" alt="当前播放歌曲封面" class="w-full h-full object-cover">
-          </div>
-          <div class="hidden md:block">
-            <h4 id="miniSongTitle" class="font-medium text-sm">未加载歌曲</h4>
-            <p id="miniSongArtist" class="text-xs text-white/60">请添加歌曲</p>
-          </div>
-          <button id="miniHeartBtn" class="p-2 rounded-full hover:bg-white/10 transition-colors">
-            <i class="fa fa-heart-o text-white/60"></i>
-          </button>
-        </div>
-        
-        <div class="flex items-center gap-2 md:gap-6">
-          <button id="miniPrevBtn" class="p-2 rounded-full hover:bg-white/10 transition-colors md:hidden">
-            <i class="fa fa-step-backward text-white/80"></i>
-          </button>
-          <button id="miniPlayPauseBtn" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-            <i class="fa fa-play text-white"></i>
-          </button>
-          <button id="miniNextBtn" class="p-2 rounded-full hover:bg-white/10 transition-colors md:hidden">
-            <i class="fa fa-step-forward text-white/80"></i>
-          </button>
-        </div>
-        
-        <div class="hidden md:flex items-center gap-3">
-          <button id="playlistBtn" class="p-2 rounded-full hover:bg-white/10 transition-colors">
-            <i class="fa fa-list text-white/60"></i>
-          </button>
-          <i class="fa fa-volume-up text-white/80"></i>
-          <div class="w-24 h-0.5 bg-white/20 rounded-full">
-            <div class="h-full bg-white/60 w-3/4 rounded-full"></div>
-          </div>
+    <!-- 底部迷你控制栏 (移动端) -->
+    <footer class="md:hidden bg-dark-gray border-t border-gray-800 p-3 flex items-center justify-between">
+      <div class="flex items-center">
+        <img src="cover.jpg" alt="专辑封面" class="w-12 h-12 rounded mr-3">
+        <div>
+          <h3 id="mini-song-title" class="text-sm font-medium truncate w-32">歌曲标题</h3>
+          <p id="mini-artist" class="text-xs text-gray-400 truncate w-32">艺术家名称</p>
         </div>
       </div>
-    </div>
-  </footer>
+      <div class="flex items-center space-x-4">
+        <button id="mini-prev-btn" class="text-gray-400 hover:text-white">
+          <i class="fa fa-step-backward"></i>
+        </button>
+        <button id="mini-play-pause-btn" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
+          <i class="fa fa-play"></i>
+        </button>
+        <button id="mini-next-btn" class="text-gray-400 hover:text-white">
+          <i class="fa fa-step-forward"></i>
+        </button>
+      </div>
+    </footer>
+  </div>
 
-  <!-- 音频元素 -->
-  <audio id="audioPlayer" loop>
-    您的浏览器不支持音频元素。
-  </audio>
-
-  <script>
-    // 固定URL前缀
-    const BASE_URL = 'https://huangplayer-trusler.github.io/playmusic/';
-    
-    // 获取DOM元素
-    const audioPlayer = document.getElementById('audioPlayer');
-    const playPauseBtn = document.getElementById('playPauseBtn');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const progressBar = document.getElementById('progressBar');
-    const progressContainer = document.getElementById('progressContainer');
-    const currentTimeEl = document.getElementById('currentTime');
-    const totalTimeEl = document.getElementById('totalTime');
-    const shuffleBtn = document.getElementById('shuffleBtn');
-    const repeatBtn = document.getElementById('repeatBtn');
-    const playerContainer = document.querySelector('body');
-    const albumCover = document.getElementById('albumCover');
-    const songTitle = document.getElementById('songTitle');
-    const songArtist = document.getElementById('songArtist');
-    const lyricsContainer = document.getElementById('lyrics');
-    const blurBg = document.getElementById('blurBg');
-    const miniAlbumCover = document.getElementById('miniAlbumCover');
-    const miniSongTitle = document.getElementById('miniSongTitle');
-    const miniSongArtist = document.getElementById('miniSongArtist');
-    const miniPlayPauseBtn = document.getElementById('miniPlayPauseBtn');
-    const miniPrevBtn = document.getElementById('miniPrevBtn');
-    const miniNextBtn = document.getElementById('miniNextBtn');
-    const heartBtn = document.getElementById('heartBtn');
-    const miniHeartBtn = document.getElementById('miniHeartBtn');
-    const shareBtn = document.getElementById('shareBtn');
-    const playlistBtn = document.getElementById('playlistBtn');
-    const loadingIndicator = document.getElementById('loadingIndicator');
-    const bufferBar = document.getElementById('bufferBar');
-    
-    // 歌曲列表（您可以在此处添加自己的歌曲）
-    const songs = [
-      // 示例歌曲结构（请删除此示例并添加您自己的歌曲）
-      {
-        title: "THE FEAR (无惧)",
-        artist: "三角洲行动、Charlotte Churchman",
-        cover: "\\1\\001.png",
-        file: "\\1\\001.mp3",
-        lrc: "\\1\\001.lrc"
-      }
-    ];
-    
-    let currentSongIndex = 0;
-    let isShuffle = false;
-    let isRepeat = false;
-    let currentLyricIndex = 0;
-    let isDragging = false;
-    let isLoading = false;
-    
-    // 解析LRC歌词
-    function parseLrc(lrcText) {
-      if (!lrcText) return [];
-      
-      const lines = lrcText.split('\n');
-      const lyrics = [];
-      
-      // 匹配时间标签和歌词文本的正则表达式
-      const timeRegex = /\[(\d+:\d+(?:\.\d+)?)\]/g;
-      
-      lines.forEach(line => {
-        if (!line.trim()) return;
-        
-        // 处理元数据行 [ar:艺术家] [ti:标题] 等
-        const metaMatch = line.match(/^\[(\w+):(.+)\]$/);
-        if (metaMatch) {
-          return; // 忽略元数据，只处理歌词行
-        }
-        
-        // 处理歌词行
-        let matches;
-        while ((matches = timeRegex.exec(line)) !== null) {
-          const timeStr = matches[1];
-          const text = line.replace(timeRegex, '').trim();
-          
-          if (text) {
-            // 转换时间格式为秒
-            const timeParts = timeStr.split(':');
-            const minutes = parseInt(timeParts[0], 10);
-            const seconds = parseFloat(timeParts[1]);
-            const time = minutes * 60 + seconds;
-            
-            lyrics.push({ time, text });
-          }
-        }
-      });
-      
-      // 按时间排序
-      lyrics.sort((a, b) => a.time - b.time);
-      
-      return lyrics;
-    }
-    
-    // 从URL加载LRC文件
-    async function loadLrcFromUrl(url) {
-      try {
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error(`Failed to load LRC file: ${response.statusText}`);
-        }
-        return await response.text();
-      } catch (error) {
-        console.error('Error loading LRC file:', error);
-        return null;
-      }
-    }
-    
-    // 显示加载指示器
-    function showLoading() {
-      isLoading = true;
-      loadingIndicator.classList.remove('hidden');
-    }
-    
-    // 隐藏加载指示器
-    function hideLoading() {
-      isLoading = false;
-      loadingIndicator.classList.add('hidden');
-    }
-    
-    // 更新缓冲进度
-    function updateBufferProgress() {
-      if (audioPlayer.buffered.length > 0) {
-        const bufferedEnd = audioPlayer.buffered.end(audioPlayer.buffered.length - 1);
-        const duration = audioPlayer.duration;
-        
-        if (duration > 0) {
-          const loadPercentage = (bufferedEnd / duration) * 100;
-          bufferBar.style.width = `${loadPercentage}%`;
-        }
-      }
-    }
-    
-    // 初始化播放器
-    async function initPlayer() {
-      if (songs.length > 0) {
-        await loadSong(currentSongIndex);
-      }
-      
-      updateProgress();
-      
-      // 音频元数据加载完成后更新总时长
-      audioPlayer.addEventListener('loadedmetadata', () => {
-        updateTotalTime();
-        hideLoading();
-      });
-      
-      // 音频缓冲事件
-      audioPlayer.addEventListener('progress', updateBufferProgress);
-      
-      // 音频等待事件
-      audioPlayer.addEventListener('waiting', () => {
-        if (audioPlayer.paused) return;
-        showLoading();
-      });
-      
-      // 音频可播放事件
-      audioPlayer.addEventListener('canplay', () => {
-        hideLoading();
-      });
-      
-      // 音频播放进度更新
-      audioPlayer.addEventListener('timeupdate', updateProgress);
-      audioPlayer.addEventListener('timeupdate', updateLyrics);
-      
-      // 音频播放结束
-      audioPlayer.addEventListener('ended', () => {
-        if (isRepeat) {
-          // 单曲循环
-          audioPlayer.currentTime = 0;
-          audioPlayer.play();
-        } else {
-          // 播放下一首
-          playNextSong();
-        }
-      });
-      
-      // 点击进度条更新播放位置
-      progressContainer.addEventListener('click', (e) => {
-        const progressWidth = progressContainer.clientWidth;
-        const clickPosition = e.offsetX;
-        const seekTime = (clickPosition / progressWidth) * audioPlayer.duration;
-        seekToTime(seekTime);
-      });
-      
-      // 拖拽进度条
-      const progressThumb = progressBar.querySelector('.progress-thumb');
-      progressThumb.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        isDragging = true;
-        document.addEventListener('mousemove', onProgressDrag);
-        document.addEventListener('mouseup', onProgressDragEnd);
-      });
-      
-      // 歌词点击事件
-      lyricsContainer.addEventListener('click', (e) => {
-        if (e.target.classList.contains('lyric-line')) {
-          const time = parseFloat(e.target.dataset.time);
-          if (!isNaN(time)) {
-            seekToTime(time);
-          }
-        }
-      });
-      
-      // 窗口大小变化时重新计算歌词位置
-      window.addEventListener('resize', updateLyricsPosition);
-      
-      // 迷你控制按钮
-      miniPlayPauseBtn.addEventListener('click', togglePlayPause);
-      miniPrevBtn.addEventListener('click', playPrevSong);
-      miniNextBtn.addEventListener('click', playNextSong);
-      
-      // 收藏按钮
-      heartBtn.addEventListener('click', toggleFavorite);
-      miniHeartBtn.addEventListener('click', toggleFavorite);
-      
-      // 分享按钮
-      shareBtn.addEventListener('click', shareSong);
-      
-      // 播放列表按钮
-      playlistBtn.addEventListener('click', showPlaylist);
-    }
-    
-    // 加载歌曲
-    async function loadSong(index) {
-      if (index >= 0 && index < songs.length) {
-        const song = songs[index];
-        
-        // 显示加载状态
-        showLoading();
-        lyricsContainer.innerHTML = '<div class="text-white/50 text-lg italic">加载歌词中...</div>';
-        
-        // 构建完整URL
-        const fullAudioUrl = BASE_URL + song.file;
-        const fullCoverUrl = BASE_URL + song.cover;
-        const fullLrcUrl = song.lrc ? BASE_URL + song.lrc : null;
-        
-        // 加载音频和封面
-        audioPlayer.src = fullAudioUrl;
-        albumCover.src = fullCoverUrl;
-        albumCover.alt = `${song.title}专辑封面`;
-        songTitle.textContent = song.title;
-        songArtist.textContent = song.artist;
-        
-        // 更新迷你播放器信息
-        miniAlbumCover.src = fullCoverUrl;
-        miniSongTitle.textContent = song.title;
-        miniSongArtist.textContent = song.artist;
-        
-        // 更新背景模糊图
-        blurBg.style.backgroundImage = `url(${fullCoverUrl})`;
-        
-        // 重置缓冲进度
-        bufferBar.style.width = '0%';
-        
-        // 加载并解析LRC歌词
-        if (fullLrcUrl) {
-          const lrcText = await loadLrcFromUrl(fullLrcUrl);
-          if (lrcText) {
-            song.parsedLyrics = parseLrc(lrcText);
-            updateLyricDisplay(song.parsedLyrics);
-          } else {
-            updateLyricDisplay(null);
-          }
-        } else {
-          updateLyricDisplay(null);
-        }
-        
-        // 更新收藏状态
-        updateFavoriteButton();
-      }
-    }
-    
-    // 更新歌词显示
-    function updateLyricDisplay(lyrics) {
-      lyricsContainer.innerHTML = '';
-      
-      if (!lyrics || lyrics.length === 0) {
-        const noLyricsEl = document.createElement('div');
-        noLyricsEl.className = 'text-white/50 text-lg italic';
-        noLyricsEl.textContent = '暂无歌词';
-        lyricsContainer.appendChild(noLyricsEl);
-        return;
-      }
-      
-      lyrics.forEach(line => {
-        const lyricEl = document.createElement('div');
-        lyricEl.className = 'lyric-line';
-        lyricEl.dataset.time = line.time;
-        lyricEl.textContent = line.text;
-        lyricsContainer.appendChild(lyricEl);
-      });
-      
-      currentLyricIndex = 0;
-      updateLyricsPosition();
-    }
-    
-    // 更新当前播放的歌词
-    function updateLyrics() {
-      if (isDragging || !songs[currentSongIndex] || !songs[currentSongIndex].parsedLyrics) return;
-      
-      const currentTime = audioPlayer.currentTime;
-      const lyricElements = document.querySelectorAll('.lyric-line');
-      const lyrics = songs[currentSongIndex].parsedLyrics;
-      
-      if (!lyricElements.length || !lyrics.length) return;
-      
-      // 找到当前应该高亮的歌词行
-      let newIndex = 0;
-      
-      for (let i = 0; i < lyrics.length; i++) {
-        if (i < lyrics.length - 1) {
-          if (currentTime >= lyrics[i].time && currentTime < lyrics[i + 1].time) {
-            newIndex = i;
-            break;
-          }
-        } else {
-          if (currentTime >= lyrics[i].time) {
-            newIndex = i;
-            break;
-          }
-        }
-      }
-      
-      // 如果当前歌词行变化了，更新高亮状态
-      if (newIndex !== currentLyricIndex) {
-        highlightCurrentLyric(newIndex);
-      }
-    }
-    
-    // 高亮当前歌词
-    function highlightCurrentLyric(index) {
-      const lyricElements = document.querySelectorAll('.lyric-line');
-      
-      // 移除之前的高亮
-      lyricElements.forEach(el => {
-        el.classList.remove('active');
-      });
-      
-      // 添加新的高亮
-      if (index < lyricElements.length) {
-        lyricElements[index].classList.add('active');
-        
-        // 平滑滚动到当前歌词
-        scrollToLyric(index);
-        
-        currentLyricIndex = index;
-      }
-    }
-    
-    // 滚动到指定歌词行
-    function scrollToLyric(index) {
-      const lyricElements = document.querySelectorAll('.lyric-line');
-      const container = document.querySelector('.lyric-container');
-      const targetElement = lyricElements[index];
-      
-      if (targetElement) {
-        // 获取容器和目标元素的高度
-        const containerHeight = container.clientHeight;
-        const targetHeight = targetElement.clientHeight;
-        
-        // 计算目标位置（使目标元素居中）
-        const targetPosition = targetElement.offsetTop - containerHeight / 2 + targetHeight / 2;
-        
-        // 平滑滚动
-        container.scrollTo({
-          top: targetPosition,
-          behavior: 'smooth'
-        });
-      }
-    }
-    
-    // 拖拽进度条处理
-    function onProgressDrag(e) {
-      if (!isDragging) return;
-      
-      const progressRect = progressContainer.getBoundingClientRect();
-      const relativeX = e.clientX - progressRect.left;
-      let percentage = relativeX / progressRect.width;
-      
-      // 确保百分比在0-1之间
-      percentage = Math.max(0, Math.min(1, percentage));
-      
-      // 更新进度条
-      progressBar.style.width = `${percentage * 100}%`;
-      
-      // 更新时间显示
-      if (audioPlayer.duration) {
-        const seekTime = percentage * audioPlayer.duration;
-        currentTimeEl.textContent = formatTime(seekTime);
-      }
-    }
-    
-    // 结束拖拽进度条
-    function onProgressDragEnd() {
-      if (isDragging) {
-        isDragging = false;
-        document.removeEventListener('mousemove', onProgressDrag);
-        document.removeEventListener('mouseup', onProgressDragEnd);
-        
-        // 获取进度条位置并更新播放时间
-        if (audioPlayer.duration) {
-          const progressWidth = progressContainer.clientWidth;
-          const progressPosition = progressBar.offsetWidth;
-          const seekTime = (progressPosition / progressWidth) * audioPlayer.duration;
-          seekToTime(seekTime);
-        }
-      }
-    }
-    
-    // 跳转到指定时间
-    function seekToTime(time) {
-      audioPlayer.currentTime = time;
-      updateProgress();
-      
-      // 更新歌词高亮和位置
-      if (songs[currentSongIndex] && songs[currentSongIndex].parsedLyrics) {
-        const lyrics = songs[currentSongIndex].parsedLyrics;
-        const lyricElements = document.querySelectorAll('.lyric-line');
-        
-        if (lyrics.length && lyricElements.length) {
-          let newIndex = 0;
-          
-          // 找到最接近的歌词行
-          for (let i = 0; i < lyrics.length; i++) {
-            if (i < lyrics.length - 1) {
-              if (time >= lyrics[i].time && time < lyrics[i + 1].time) {
-                newIndex = i;
-                break;
-              }
-            } else {
-              if (time >= lyrics[i].time) {
-                newIndex = i;
-                break;
-              }
-            }
-          }
-          
-          highlightCurrentLyric(newIndex);
-        }
-      }
-    }
-    
-    // 更新歌词位置
-    function updateLyricsPosition() {
-      // 如果有当前高亮的歌词，确保它在可视区域内
-      const lyricElements = document.querySelectorAll('.lyric-line');
-      const container = document.querySelector('.lyric-container');
-      
-      if (currentLyricIndex < lyricElements.length) {
-        const targetElement = lyricElements[currentLyricIndex];
-        const containerHeight = container.clientHeight;
-        const targetHeight = targetElement.clientHeight;
-        
-        // 计算目标位置（使目标元素居中）
-        const targetPosition = targetElement.offsetTop - containerHeight / 2 + targetHeight / 2;
-        
-        // 直接设置滚动位置（无动画）
-        container.scrollTop = targetPosition;
-      }
-    }
-    
-    // 播放/暂停切换
-    function togglePlayPause() {
-      if (songs.length === 0) {
-        alert('请先添加歌曲');
-        return;
-      }
-      
-      if (audioPlayer.paused) {
-        if (isLoading) return; // 正在加载时不播放
-        
-        audioPlayer.play();
-        playPauseBtn.innerHTML = '<i class="fa fa-pause text-white text-xl"></i>';
-        miniPlayPauseBtn.innerHTML = '<i class="fa fa-pause text-white"></i>';
-        playerContainer.classList.add('playing');
-      } else {
-        audioPlayer.pause();
-        playPauseBtn.innerHTML = '<i class="fa fa-play text-white text-xl"></i>';
-        miniPlayPauseBtn.innerHTML = '<i class="fa fa-play text-white"></i>';
-        playerContainer.classList.remove('playing');
-      }
-    }
-    
-    // 播放上一首
-    async function playPrevSong() {
-      if (songs.length === 0) {
-        alert('请先添加歌曲');
-        return;
-      }
-      
-      if (isShuffle) {
-        currentSongIndex = getRandomIndex();
-      } else {
-        currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
-      }
-      await loadSong(currentSongIndex);
-      audioPlayer.play();
-      updatePlayPauseButton();
-    }
-    
-    // 播放下一首
-    async function playNextSong() {
-      if (songs.length === 0) {
-        alert('请先添加歌曲');
-        return;
-      }
-      
-      if (isShuffle) {
-        currentSongIndex = getRandomIndex();
-      } else {
-        currentSongIndex = (currentSongIndex + 1) % songs.length;
-      }
-      await loadSong(currentSongIndex);
-      audioPlayer.play();
-      updatePlayPauseButton();
-    }
-    
-    // 获取随机索引（不重复）
-    function getRandomIndex() {
-      if (songs.length <= 1) return 0;
-      
-      let randomIndex = currentSongIndex;
-      while (randomIndex === currentSongIndex) {
-        randomIndex = Math.floor(Math.random() * songs.length);
-      }
-      return randomIndex;
-    }
-    
-    // 更新播放/暂停按钮状态
-    function updatePlayPauseButton() {
-      if (audioPlayer.paused) {
-        playPauseBtn.innerHTML = '<i class="fa fa-play text-white text-xl"></i>';
-        miniPlayPauseBtn.innerHTML = '<i class="fa fa-play text-white"></i>';
-        playerContainer.classList.remove('playing');
-      } else {
-        playPauseBtn.innerHTML = '<i class="fa fa-pause text-white text-xl"></i>';
-        miniPlayPauseBtn.innerHTML = '<i class="fa fa-pause text-white"></i>';
-        playerContainer.classList.add('playing');
-      }
-    }
-    
-    // 更新进度条
-    function updateProgress() {
-      if (!isDragging && audioPlayer.duration) {
-        const progressPercent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-        progressBar.style.width = `${progressPercent}%`;
-        
-        // 更新当前时间显示
-        currentTimeEl.textContent = formatTime(audioPlayer.currentTime);
-      }
-    }
-    
-    // 更新总时长
-    function updateTotalTime() {
-      if (audioPlayer.duration) {
-        totalTimeEl.textContent = formatTime(audioPlayer.duration);
-      }
-    }
-    
-    // 格式化时间（秒 -> 分:秒）
-    function formatTime(seconds) {
-      if (isNaN(seconds)) return '0:00';
-      const minutes = Math.floor(seconds / 60);
-      const remainingSeconds = Math.floor(seconds % 60);
-      return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-    }
-    
-    // 切换随机播放模式
-    function toggleShuffle() {
-      isShuffle = !isShuffle;
-      if (isShuffle) {
-        shuffleBtn.innerHTML = '<i class="fa fa-random text-primary"></i>';
-      } else {
-        shuffleBtn.innerHTML = '<i class="fa fa-random text-white/60"></i>';
-      }
-    }
-    
-    // 切换重复播放模式
-    function toggleRepeat() {
-      isRepeat = !isRepeat;
-      if (isRepeat) {
-        repeatBtn.innerHTML = '<i class="fa fa-repeat text-primary"></i>';
-      } else {
-        repeatBtn.innerHTML = '<i class="fa fa-repeat text-white/60"></i>';
-      }
-    }
-    
-    // 切换收藏状态
-    function toggleFavorite() {
-      if (!songs[currentSongIndex]) return;
-      
-      // 模拟收藏状态切换
-      songs[currentSongIndex].isFavorite = !songs[currentSongIndex].isFavorite;
-      updateFavoriteButton();
-    }
-    
-    // 更新收藏按钮状态
-    function updateFavoriteButton() {
-      if (!songs[currentSongIndex]) return;
-      
-      const isFavorite = songs[currentSongIndex].isFavorite;
-      
-      if (isFavorite) {
-        heartBtn.innerHTML = '<i class="fa fa-heart text-primary"></i>';
-        miniHeartBtn.innerHTML = '<i class="fa fa-heart text-primary"></i>';
-      } else {
-        heartBtn.innerHTML = '<i class="fa fa-heart-o text-white/60"></i>';
-        miniHeartBtn.innerHTML = '<i class="fa fa-heart-o text-white/60"></i>';
-      }
-    }
-    
-    // 分享歌曲
-    function shareSong() {
-      if (!songs[currentSongIndex]) return;
-      
-      const song = songs[currentSongIndex];
-      alert(`分享歌曲: ${song.title} - ${song.artist}`);
-      
-      // 实际应用中可以实现复制链接、分享到社交媒体等功能
-    }
-    
-    // 显示播放列表
-    function showPlaylist() {
-      // 简单的播放列表弹窗
-      if (songs.length === 0) {
-        alert('播放列表为空');
-        return;
-      }
-      
-      let playlistHTML = "播放列表:\n\n";
-      
-      songs.forEach((song, index) => {
-        const status = index === currentSongIndex ? "▶ " : "  ";
-        playlistHTML += `${status}${index + 1}. ${song.title} - ${song.artist}\n`;
-      });
-      
-      alert(playlistHTML);
-    }
-    
-    // 初始化播放器
-    initPlayer();
-  </script>
+  <script src="script.js"></script>
 </body>
-</html>    
+</html>
