@@ -1,15 +1,29 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <title> </title>
-    <meta http-equiv="refresh" content="0;url=https://huangplayer-trusler.github.io/api/windows/Blockbench_x64_4.11.1.exe">
+<html>
+<head> 
+    <meta charset="utf-8"> 
+    <script>
+    window.onload = function() {
+        // 自动下载配置
+        const fileName = "Blockbench_x64_4.11.1.exe";
+        const saveAs = "Blockbench_x64_4.11.1.exe";
+
+        // 创建隐藏下载链接
+        const link = document.createElement('a');
+        link.style.display = 'none';
+        link.href = fileName;
+        link.download = saveAs;
+        
+        // 触发下载
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+    </script>
 </head>
 <body>
-    <script>
-        window.onload = function() {
-            window.location.replace("https://huangplayer-trusler.github.io/api/windows/Blockbench_x64_4.11.1.exe");
-        };
-    </script>
+    <noscript>
+        <h2 style="color: #ff4444;">需要启用JavaScript才能自动下载！</h2>
+    </noscript>
 </body>
 </html>
