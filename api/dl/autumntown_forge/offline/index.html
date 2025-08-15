@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head> 
+    <meta charset="utf-8"> 
+    <script>
+    window.onload = function() {
+        // 自动下载配置
+        const fileName = "AutumnTown_Forge_3.18.zip";
+        const saveAs = "AutumnTown_Forge_3.18.zip";
+
+        // 创建隐藏下载链接
+        const link = document.createElement('a');
+        link.style.display = 'none';
+        link.href = fileName;
+        link.download = saveAs;
+        
+        // 触发下载
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+    </script>
+</head>
+<body>
+    <noscript>
+        <h2 style="color: #ff4444;">需要启用JavaScript才能自动下载！</h2>
+    </noscript>
+</body>
+</html>
