@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Autumn-Town</title>
+    <script src="https://list.mczfw.cn/mczfw.js" async></script>
     <link rel="preload" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" as="style">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -76,7 +77,7 @@
     <nav id="navbar" class="fixed w-full z-40 transition-all duration-300 bg-dark/80 backdrop-blur-md">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center">
-                <div class="w-10 h-10 grass-block block-border mr-3 animate-float"></div>
+                <img src="pic/logo.jpg" alt=" " class="w-10 h-10 object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy"> 
                 <h1 class="text-2xl font-minecraft text-primary">Autumn-Town 秋日小镇 3.0</h1>
             </div>
             <div class="hidden md:flex space-x-6">
@@ -298,7 +299,7 @@
     <section id="servers" class="py-20 bg-gradient-to-b from-dark to-dark/90">
         <div class="container mx-auto px-4">
             <div class="text-center mb-16">
-                <h2 class="text-[clamp(1.8rem,5vw,3rem)] font-minecraft text-primary mb-4">服务器状态(没写完 整了个随机数)</h2>
+                <h2 class="text-[clamp(1.8rem,5vw,3rem)] font-minecraft text-primary mb-4">服务器状态</h2>
                 <div class="w-32 h-1 bg-primary mx-auto"></div>
                 <p class="mt-4 max-w-2xl mx-auto">加入我们的服务器，与其他玩家一起游戏</p>
             </div>
@@ -315,7 +316,7 @@
                         <div>
                             <div class="flex justify-between mb-1 text-sm">
                                 <span>玩家数量</span>
-                                <span class="font-minecraft" id="player-count">24/100</span>
+                                <span ip="mc.autumntown.top">检测中</span>
                             </div>
                             <div class="w-full bg-dark/80 h-2 rounded-full overflow-hidden">
                                 <div class="bg-primary h-full rounded-full" id="player-bar" style="width: 24%"></div>
@@ -324,7 +325,7 @@
                         <div>
                             <div class="flex justify-between mb-1 text-sm">
                                 <span>延迟</span>
-                                <span class="font-minecraft" id="server-ping">28 ms</span>
+                                <span ping="mc.autumntown.top">检测中</span>
                             </div>
                             <div class="w-full bg-dark/80 h-2 rounded-full overflow-hidden">
                                 <div class="bg-secondary h-full rounded-full" id="ping-bar" style="width: 30%"></div>
@@ -348,7 +349,7 @@
                         <div>
                             <div class="flex justify-between mb-1 text-sm">
                                 <span>玩家数量</span>
-                                <span class="font-minecraft">12/50</span>
+                                <span ip="mc.autumntown.top">检测中</span>
                             </div>
                             <div class="w-full bg-dark/80 h-2 rounded-full overflow-hidden">
                                 <div class="bg-primary h-full rounded-full" style="width: 24%"></div>
@@ -357,7 +358,7 @@
                         <div>
                             <div class="flex justify-between mb-1 text-sm">
                                 <span>延迟</span>
-                                <span class="font-minecraft">32 ms</span>
+                                <span ping="mc.autumntown.top">检测中</span>
                             </div>
                             <div class="w-full bg-dark/80 h-2 rounded-full overflow-hidden">
                                 <div class="bg-secondary h-full rounded-full" style="width: 26%"></div>
