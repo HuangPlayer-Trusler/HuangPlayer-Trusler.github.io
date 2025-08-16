@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autumn-Town</title>
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" as="style">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#52C41A',
+                        secondary: '#1890FF',
+                        accent: '#FAAD14',
+                        dark: '#1D2129',
+                        light: '#F2F3F5',
+                        block: {
+                            dirt: '#8B4513',
+                            grass: '#228B22',
+                            stone: '#A9A9A9',
+                            wood: '#DEB887'
+                        }
+                    },
+                    fontFamily: {
+                        minecraft: ['"Minecraftia"', 'sans-serif'],
+                        sans: ['Inter', 'sans-serif']
+                    },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'block-appear': 'blockAppear 0.5s ease-out forwards',
+                        'fade-in': 'fadeIn 0.8s ease-out forwards',
+                        'slide-up': 'slideUp 0.6s ease-out forwards'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        },
+                        blockAppear: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(30px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); }
+            .block-border { border: 2px solid rgba(0, 0, 0, 0.3); box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.1); }
+            .minecraft-btn { @apply bg-primary hover:bg-primary/80 text-white font-bold py-2 px-4 rounded transition-all duration-200 transform hover:scale-105 active:scale-95 block-border; }
+            .minecraft-card { @apply bg-light/10 backdrop-blur-sm block-border rounded-lg overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1; }
+            .grass-block { background-image: linear-gradient(to bottom, #228B22 50%, #8B4513 50%); }
+            .wood-block { background-image: linear-gradient(90deg, #DEB887 30%, #CD853F 30%, #CD853F 70%, #DEB887 70%); }
+            .stone-block { background-color: #A9A9A9; background-image: linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%), linear-gradient(-45deg, rgba(255,255,255,0.1) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.1) 75%), linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.1) 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px; }
+            .ore-block { background-color: #5A5A5A; background-image: radial-gradient(circle, #FAAD14 2px, transparent 2px); background-size: 20px 20px; }
+            .visibility-hidden { visibility: hidden; }
+        }
+    </style>
+</head>
+<body class="bg-dark text-light font-sans overflow-x-hidden">
+    <div id="loading-bar" class="fixed top-0 left-0 h-1 bg-primary z-50 w-0 transition-all duration-300"></div>
+    <nav id="navbar" class="fixed w-full z-40 transition-all duration-300 bg-dark/80 backdrop-blur-md">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center">
+                <div class="w-10 h-10 grass-block block-border mr-3 animate-float"></div>
+                <h1 class="text-2xl font-minecraft text-primary">Autumn-Town 秋日小镇 3.0</h1>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="#home" class="hover:text-primary transition-colors font-minecraft">首页</a>
+                <a href="#about" class="hover:text-primary transition-colors font-minecraft">游玩须知</a>
+                <a href="#gallery" class="hover:text-primary transition-colors font-minecraft">精选图片</a>
+                <a href="#servers" class="hover:text-primary transition-colors font-minecraft">服务器</a>
+                <a href="#news" class="hover:text-primary transition-colors font-minecraft">最新动态</a>
+                <a href="#ranking" class="hover:text-primary transition-colors font-minecraft">玩家排行</a>
+                <a href="#contact" class="hover:text-primary transition-colors font-minecraft">联系我们</a>
+            </div>
+            <button id="menu-toggle" class="md:hidden text-2xl">
+                <i class="fa fa-bars"></i>
+            </button>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-dark/95 backdrop-blur-md block-border">
+            <div class="container mx-auto px-4 py-3 flex flex-col space-y-4">
+                <a href="#home" class="hover:text-primary transition-colors py-2 font-minecraft">首页</a>
+                <a href="#about" class="hover:text-primary transition-colors py-2 font-minecraft">游玩须知</a>
+                <a href="#gallery" class="hover:text-primary transition-colors py-2 font-minecraft">小镇特色</a>
+                <a href="#servers" class="hover:text-primary transition-colors py-2 font-minecraft">服务器</a>
+                <a href="#news" class="hover:text-primary transition-colors py-2 font-minecraft">最新动态</a>
+                <a href="#ranking" class="hover:text-primary transition-colors py-2 font-minecraft">玩家排行</a>
+                <a href="#contact" class="hover:text-primary transition-colors py-2 font-minecraft">联系我们</a>
+            </div>
+        </div>
+    </nav>
+    <section id="home" class="min-h-screen pt-20 relative flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <div class="absolute inset-0 bg-gradient-to-b from-dark/70 to-dark z-10"></div>
+            <img src="pic/bg.png" alt="我的世界风景" class="w-full h-full object-cover" loading="eager">
+        </div>
+        <div class="container mx-auto px-4 z-20 text-center">
+            <h1 class="text-[clamp(2.5rem,8vw,5rem)] font-minecraft text-primary mb-6 text-shadow animate-float">Autumn-Town秋日小镇</h1>
+            <p class="text-[clamp(1rem,3vw,1.5rem)] max-w-3xl mx-auto mb-10 text-shadow opacity-0" id="hero-subtitle">在做了在做了（新建文件夹）</p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4 opacity-0" id="hero-buttons">
+                <a href="#about" class="minecraft-btn">了解更多 <i class="fa fa-arrow-right ml-2"></i></a>
+                <a href="#servers" class="minecraft-btn bg-secondary">加入服务器 <i class="fa fa-server ml-2"></i></a>
+                <a href="#download" class="minecraft-btn bg-accent">客户端下载 <i class="fa fa-download ml-2"></i></a>
+            </div>
+        </div>
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce z-20">
+            <a href="#about" class="text-light/70 hover:text-primary transition-colors">
+                <i class="fa fa-chevron-down text-2xl"></i>
+            </a>
+        </div>
+    </section>
+    <section id="about" class="py-20 bg-gradient-to-b from-dark to-dark/90">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-[clamp(1.8rem,5vw,3rem)] font-minecraft text-primary mb-4">游玩须知</h2>
+                <div class="w-32 h-1 bg-primary mx-auto"></div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="order-2 md:order-1">
+                    <h3 class="text-2xl font-minecraft text-accent mb-6">秋日小镇服务器规则</h3>
+                    <p class="mb-4 leading-relaxed">秋日小镇是一个我的世界服务器，请各位遵守以下要求，共同维护良好的游戏环境</p>
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-start"><span class="text-accent mr-2">1.</span><span class="text-purple-400">进群后必须将群ID改为游戏ID，以免有事情发生的时候@不到人</span></li>
+                        <li class="flex items-start"><span class="text-accent mr-2">2.</span><span class="text-purple-400">严禁开挂，开挂即ban，永久封禁不予解封</span></li>
+                        <li class="flex items-start"><span class="text-accent mr-2">3.</span><span class="text-purple-400">尊重其他玩家，禁止辱骂和骚扰，友善交流</span></li>
+                        <li class="flex items-start"><span class="text-accent mr-2">4.</span><span class="text-purple-400">未经允许不得破坏他人建筑，保护他人劳动成果</span></li>
+                        <li class="flex items-start"><span class="text-accent mr-2">5.</span><span class="text-purple-400">禁止发布不良内容和广告，保持聊天环境整洁</span></li>
+                        <li class="flex items-start"><span class="text-accent mr-2">6.</span><span class="text-purple-400">禁止利用游戏漏洞获取不正当利益，发现漏洞请及时反馈</span></li>
+                    </ul>
+                    <a href="#download" class="minecraft-btn inline-block">获取客户端 <i class="fa fa-download ml-2"></i></a>
+                </div>
+                <div class="order-1 md:order-2 relative">
+                    <div class="relative z-10 rounded-lg overflow-hidden block-border transform rotate-2 hover:rotate-0 transition-transform duration-500">
+                        <img src="pic/gamepic/build/1.jpg" alt="我的世界游戏画面" class="w-full h-auto" loading="lazy">
+                    </div>
+                    <div class="absolute top-10 -right-10 w-40 h-40 grass-block block-border -z-10 animate-float"></div>
+                    <div class="absolute -bottom-5 -left-5 w-32 h-32 wood-block block-border -z-10 animate-float" style="animation-delay: 1s"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="download" class="py-20 bg-dark/90">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-[clamp(1.8rem,5vw,3rem)] font-minecraft text-primary mb-4">客户端下载</h2>
+                <div class="w-32 h-1 bg-primary mx-auto"></div>
+                <p class="mt-4 max-w-2xl mx-auto">下载专用客户端，获得最佳游戏体验</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <div class="minecraft-card p-6 flex flex-col">
+                    <div class="w-16 h-16 wood-block block-border mx-auto mb-4"></div>
+                    <h3 class="text-xl font-minecraft text-accent text-center mb-2">Forge客户端</h3>
+                    <p class="text-center text-sm text-light/70 mb-4">适合大多数玩家的稳定版本</p>
+                    <div class="space-y-2 mb-6 text-sm">
+                        <p><i class="fa fa-check text-primary mr-2"></i>版本: 1.20.1</p>
+                        <p><i class="fa fa-check text-primary mr-2"></i>包含所有必要模组</p>
+                        <p><i class="fa fa-check text-primary mr-2"></i>自动更新功能</p>
+                    </div>
+                    <a href="https://189.ly93.cc/3UvUnebiUb6j/125201207845594451/AutumnTown_Forge_3.18.zip?q=FkfsUgJAfy_A3Ex0cVyuk0AhAncFMRCGeINjjo-ncEaoHqXHO1xluSBZPlkFhfS5" class="minecraft-btn mt-auto">下载 <i class="fa fa-download ml-2"></i></a>
+                </div>
+                <div class="minecraft-card p-6 flex flex-col">
+                    <div class="w-16 h-16 stone-block block-border mx-auto mb-4"></div>
+                    <h3 class="text-xl font-minecraft text-accent text-center mb-2">Fabric客户端</h3>
+                    <p class="text-center text-sm text-light/70 mb-4">待补</p>
+                    <div class="space-y-2 mb-6 text-sm">
+                        <p><i class="fa fa-check text-primary mr-2"></i>待补</p>
+                        <p><i class="fa fa-check text-primary mr-2"></i>待补</p>
+                        <p><i class="fa fa-check text-primary mr-2"></i>待补</p>
+                    </div>
+                    <a href="#" class="minecraft-btn mt-auto">待补 <i class="fa fa-download ml-2"></i></a>
+                </div>
+                <div class="minecraft-card p-6 flex flex-col">
+                    <div class="w-16 h-16 ore-block block-border mx-auto mb-4"></div>
+                    <h3 class="text-xl font-minecraft text-accent text-center mb-2">整合包资源</h3>
+                    <p class="text-center text-sm text-light/70 mb-4">待补</p>
+                    <div class="space-y-2 mb-6 text-sm">
+                        <p><i class="fa fa-check text-primary mr-2"></i>待补</p>
+                        <p><i class="fa fa-check text-primary mr-2"></i>待补</p>
+                        <p><i class="fa fa-check text-primary mr-2"></i>待补</p>
+                    </div>
+                    <a href="#" class="minecraft-btn mt-auto">待补 <i class="fa fa-download ml-2"></i></a>
+                </div>  
+            </div>
+            <div class="mt-12 max-w-3xl mx-auto minecraft-card p-6">
+                <h3 class="text-lg font-minecraft text-accent mb-4">安装教程</h3>
+                <div class="space-y-4 text-sm">
+                    <p><i class="fa fa-circle text-primary text-xs mr-2"></i>下载对应客户端压缩包并解压到任意文件夹</p>
+                    <p><i class="fa fa-circle text-primary text-xs mr-2"></i>运行"PCL2"或者"HMCL"</p>
+                    <p><i class="fa fa-circle text-primary text-xs mr-2"></i>登录账号后(离线填写玩家名)，将文件夹内的AutumnTown_Forge_x.xx.zip直接拖入启动器</p>
+                    <p><i class="fa fa-circle text-primary text-xs mr-2"></i>安装完成后点击启动游戏后等待游戏启动后就行了</p>
+                    <p><i class="fa fa-circle text-primary text-xs mr-2"></i>如果遇到问题，请查看FAQ或联系管理员</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="gallery" class="py-20 bg-dark">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-[clamp(1.8rem,5vw,3rem)] font-minecraft text-primary mb-4">精选图片</h2>
+                <div class="w-32 h-1 bg-primary mx-auto"></div>
+                <p class="mt-4 max-w-2xl mx-auto">感谢@qingfeng2233 @Yorigami_Shion_M @小籽籽籽籽籽 @oldandman 提供的图片</p>
+            </div>
+            <div class="flex flex-wrap justify-center gap-3 mb-10">
+                <button class="gallery-filter active px-4 py-1 rounded-full bg-primary/20 hover:bg-primary/40 transition-colors font-minecraft" data-filter="all">全部</button>
+                <button class="gallery-filter px-4 py-1 rounded-full bg-primary/20 hover:bg-primary/40 transition-colors font-minecraft" data-filter="building">建筑</button>
+                <button class="gallery-filter px-4 py-1 rounded-full bg-primary/20 hover:bg-primary/40 transition-colors font-minecraft" data-filter="art">艺术</button>
+                <button class="gallery-filter px-4 py-1 rounded-full bg-primary/20 hover:bg-primary/40 transition-colors font-minecraft" data-filter="nature">自然景观</button>
+            </div>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="gallery-item overflow-hidden rounded-lg block-border group" data-category="building">
+                    <img src="pic/gamepic/build/1.jpg" alt=" " class="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy">
+                    <div class="p-4 bg-dark/80 backdrop-blur-sm">
+                        <h3 class="font-minecraft text-primary"> </h3>
+                        <p class="text-sm text-light/70"> </p>
+                    </div>
+                </div>
+                <div class="gallery-item overflow-hidden rounded-lg block-border group" data-category="building">
+                    <img src="pic/gamepic/build/2.jpg" alt=" " class="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy">
+                    <div class="p-4 bg-dark/80 backdrop-blur-sm">
+                        <h3 class="font-minecraft text-primary"> </h3>
+                        <p class="text-sm text-light/70"> </p>
+                    </div>
+                </div>
+                <div class="gallery-item overflow-hidden rounded-lg block-border group" data-category="art">
+                    <img src="pic/gamepic/art/1.png" alt=" " class="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy">
+                    <div class="p-4 bg-dark/80 backdrop-blur-sm">
+                        <h3 class="font-minecraft text-primary"> </h3>
+                        <p class="text-sm text-light/70"> </p>
+                    </div>
+                </div>
+                <div class="gallery-item overflow-hidden rounded-lg block-border group" data-category="building">
+                    <img src="pic/gamepic/build/3.jpg" alt=" " class="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy">
+                    <div class="p-4 bg-dark/80 backdrop-blur-sm">
+                        <h3 class="font-minecraft text-primary"> </h3>
+                        <p class="text-sm text-light/70"> </p>
+                    </div>
+                </div>
+                <div class="gallery-item overflow-hidden rounded-lg block-border group" data-category="art">
+                    <img src="pic/gamepic/art/2.png" alt=" " class="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy">
+                    <div class="p-4 bg-dark/80 backdrop-blur-sm">
+                        <h3 class="font-minecraft text-primary"> </h3>
+                        <p class="text-sm text-light/70"> </p>
+                    </div>
+                </div>
+                <div class="gallery-item overflow-hidden rounded-lg block-border group" data-category="nature">
+                    <img src="pic/gamepic/nature/1.png" alt=" " class="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy">
+                    <div class="p-4 bg-dark/80 backdrop-blur-sm">
+                        <h3 class="font-minecraft text-primary"> </h3>
+                        <p class="text-sm text-light/70"> </p>
+                    </div>
+                </div>
+                <div class="gallery-item overflow-hidden rounded-lg block-border group" data-category="building">
+                    <img src="pic/gamepic/build/4.png" alt=" " class="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy">
+                    <div class="p-4 bg-dark/80 backdrop-blur-sm">
+                        <h3 class="font-minecraft text-primary"> </h3>
+                        <p class="text-sm text-light/70"> </p>
+                    </div>
+                </div>
+                <div class="gallery-item overflow-hidden rounded-lg block-border group" data-category="nature">
+                    <img src="pic/gamepic/nature/2.jpg" alt=" " class="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy">
+                    <div class="p-4 bg-dark/80 backdrop-blur-sm">
+                        <h3 class="font-minecraft text-primary"> </h3>
+                        <p class="text-sm text-light/70"> </p>
+                    </div>
+                </div>
+                <div class="gallery-item overflow-hidden rounded-lg block-border group" data-category="art">
+                    <img src="pic/gamepic/art/3.png" alt=" " class="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy">
+                    <div class="p-4 bg-dark/80 backdrop-blur-sm">
+                        <h3 class="font-minecraft text-primary"> </h3>
+                        <p class="text-sm text-light/70" ></p>
+                    </div>
+                </div>
+                <div class="gallery-item overflow-hidden rounded-lg block-border group" data-category="building">
+                    <img src="pic/gamepic/build/5.png" alt=" " class="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy">
+                    <div class="p-4 bg-dark/80 backdrop-blur-sm">
+                        <h3 class="font-minecraft text-primary"> </h3>
+                        <p class="text-sm text-light/70"> </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="servers" class="py-20 bg-gradient-to-b from-dark to-dark/90">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-[clamp(1.8rem,5vw,3rem)] font-minecraft text-primary mb-4">服务器状态(没写完 整了个随机数)</h2>
+                <div class="w-32 h-1 bg-primary mx-auto"></div>
+                <p class="mt-4 max-w-2xl mx-auto">加入我们的服务器，与其他玩家一起游戏</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div class="minecraft-card p-6 bg-dark/60">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h3 class="text-xl font-minecraft text-accent">主用服务器</h3>
+                            <p class="text-sm text-light/70">mc.autumntown.top</p>
+                        </div>
+                        <span class="bg-primary text-white text-xs py-1 px-2 rounded-full font-minecraft">在线</span>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-1 text-sm">
+                                <span>玩家数量</span>
+                                <span class="font-minecraft" id="player-count">24/100</span>
+                            </div>
+                            <div class="w-full bg-dark/80 h-2 rounded-full overflow-hidden">
+                                <div class="bg-primary h-full rounded-full" id="player-bar" style="width: 24%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1 text-sm">
+                                <span>延迟</span>
+                                <span class="font-minecraft" id="server-ping">28 ms</span>
+                            </div>
+                            <div class="w-full bg-dark/80 h-2 rounded-full overflow-hidden">
+                                <div class="bg-secondary h-full rounded-full" id="ping-bar" style="width: 30%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-light/10">
+                        <p class="text-sm mb-4">版本: 1.20.1</p>
+                        <button class="minecraft-btn w-full" onclick="copyIP('mc.autumntown.top')">复制IP <i class="fa fa-copy ml-2"></i></button>
+                    </div>
+                </div>
+                <div class="minecraft-card p-6 bg-dark/60">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h3 class="text-xl font-minecraft text-accent">备用服务器</h3>
+                            <p class="text-sm text-light/70">114.66.41.49:10100</p>
+                        </div>
+                        <span class="bg-primary text-white text-xs py-1 px-2 rounded-full font-minecraft">在线</span>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-1 text-sm">
+                                <span>玩家数量</span>
+                                <span class="font-minecraft">12/50</span>
+                            </div>
+                            <div class="w-full bg-dark/80 h-2 rounded-full overflow-hidden">
+                                <div class="bg-primary h-full rounded-full" style="width: 24%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1 text-sm">
+                                <span>延迟</span>
+                                <span class="font-minecraft">32 ms</span>
+                            </div>
+                            <div class="w-full bg-dark/80 h-2 rounded-full overflow-hidden">
+                                <div class="bg-secondary h-full rounded-full" style="width: 26%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-light/10">
+                        <p class="text-sm mb-4">版本: 1.20.1</p>
+                        <button class="minecraft-btn w-full" onclick="copyIP('114.66.41.49:10100')">复制IP <i class="fa fa-copy ml-2"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-16 max-w-3xl mx-auto">
+                <div class="minecraft-card p-6 bg-dark/60">
+                    <h3 class="text-xl font-minecraft text-accent mb-4 text-center">服务器规则</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-start"><i class="fa fa-check-circle text-primary mt-1 mr-2"></i><span>尊重其他玩家，禁止辱骂和骚扰</span></li>
+                        <li class="flex items-start"><i class="fa fa-check-circle text-primary mt-1 mr-2"></i><span>禁止使用作弊软件和漏洞</span></li>
+                        <li class="flex items-start"><i class="fa fa-check-circle text-primary mt-1 mr-2"></i><span>未经允许不得破坏他人建筑</span></li>
+                        <li class="flex items-start"><i class="fa fa-check-circle text-primary mt-1 mr-2"></i><span>禁止发布不良内容和广告</span></li>
+                        <li class="flex items-start"><i class="fa fa-check-circle text-primary mt-1 mr-2"></i><span>请保持聊天频道友好和积极</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="news" class="py-20 bg-dark/90">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-[clamp(1.8rem,5vw,3rem)] font-minecraft text-primary mb-4">最新动态</h2>
+                <div class="w-32 h-1 bg-primary mx-auto"></div>
+                <p class="mt-4 max-w-2xl mx-auto">了解服务器最新更新和活动信息</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="minecraft-card">
+                    <div class="h-48 overflow-hidden">
+                        <img src="pic/news/1.png" alt="服务器客户端更新" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" loading="lazy">
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center text-sm text-light/60 mb-3">
+                            <i class="fa fa-calendar mr-2"></i> 2025-08-20
+                            <span class="mx-2">•</span>
+                            <i class="fa fa-user mr-2"></i> ADMIN
+                        </div>
+                        <h3 class="text-xl font-minecraft text-accent mb-3">服务器3.18版本更新公告</h3>
+                        <p class="text-light/80 mb-4 line-clamp-3">本次更新新增了多个mod并且优化了服务器性能，提升游戏体验...</p>
+                        <a href="#" class="text-primary hover:underline font-minecraft inline-flex items-center"> </a>
+                    </div>
+                </div>
+                <div class="minecraft-card">
+                    <div class="h-48 overflow-hidden">
+                        <img src="pic/news/2.png" alt=" " class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" loading="lazy">
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center text-sm text-light/60 mb-3">
+                            <i class="fa fa-calendar mr-2"></i> 2025-08-15
+                            <span class="mx-2">•</span>
+                            <i class="fa fa-user mr-2"></i>  
+                        </div>
+                        <h3 class="text-xl font-minecraft text-accent mb-3">没有更多了</h3>
+                        <p class="text-light/80 mb-4 line-clamp-3">没有更多了</p>
+                        <a href="#" class="text-primary hover:underline font-minecraft inline-flex items-center">  </a>
+                    </div>
+                </div>
+                <div class="minecraft-card">
+                    <div class="h-48 overflow-hidden">
+                        <img src="pic/news/3.png" alt=" " class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" loading="lazy">
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center text-sm text-light/60 mb-3">
+                            <i class="fa fa-calendar mr-2"></i> 2025-08-10
+                            <span class="mx-2">•</span>
+                            <i class="fa fa-user mr-2"></i>  
+                        </div>
+                        <h3 class="text-xl font-minecraft text-accent mb-3">没有更多了</h3>
+                        <p class="text-light/80 mb-4 line-clamp-3">没有更多了</p>
+                        <a href="#" class="text-primary hover:underline font-minecraft inline-flex items-center">  </a>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-10">
+                <a href="#" class="minecraft-btn inline-block"> </a>
+            </div>
+        </div>
+    </section>
+    <section id="ranking" class="py-20 bg-dark">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-[clamp(1.8rem,5vw,3rem)] font-minecraft text-primary mb-4">玩家排行</h2>
+                <div class="w-32 h-1 bg-primary mx-auto"></div>
+                <p class="mt-4 max-w-2xl mx-auto">文本</p>
+            </div>
+            <div class="flex flex-wrap justify-center gap-4 mb-10">
+                <button class="rank-filter active px-4 py-2 rounded block-border bg-primary text-white font-minecraft" data-rank="building">待补</button>
+                <button class="rank-filter px-4 py-2 rounded block-border bg-dark/60 hover:bg-primary/20 transition-colors font-minecraft" data-rank="mining">待补</button>
+                <button class="rank-filter px-4 py-2 rounded block-border bg-dark/60 hover:bg-primary/20 transition-colors font-minecraft" data-rank="trading">待补</button>
+                <button class="rank-filter px-4 py-2 rounded block-border bg-dark/60 hover:bg-primary/20 transition-colors font-minecraft" data-rank="events">待补</button>
+                <button class="rank-filter px-4 py-2 rounded block-border bg-dark/60 hover:bg-primary/20 transition-colors font-minecraft" data-rank="donate">待补</button>
+            </div>
+            <div class="max-w-4xl mx-auto">
+                <div class="rank-list space-y-4" id="building-rank">
+                    <div class="minecraft-card p-4 flex items-center bg-gradient-to-r from-accent/20 to-transparent">
+                        <div class="w-12 h-12 rounded-full bg-accent flex items-center justify-center font-minecraft text-dark font-bold text-xl mr-4">1</div>
+                        <div class="w-16 h-16 rounded-full overflow-hidden mr-4 block-border">
+                            <img src="pic/players/player1.png" alt="玩家头像" class="w-full h-full object-cover" loading="lazy">
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-minecraft text-xl text-accent">待补[name]</h3>
+                            <p class="text-sm text-light/70">待补[xml]</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-minecraft text-primary">待补[num]</div>
+                            <div class="text-xs text-light/60">待补[type]</div>
+                        </div>
+                    </div>
+                    <div class="minecraft-card p-4 flex items-center bg-gradient-to-r from-gray-300/20 to-transparent">
+                        <div class="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center font-minecraft text-dark font-bold text-xl mr-4">2</div>
+                        <div class="w-16 h-16 rounded-full overflow-hidden mr-4 block-border">
+                            <img src="pic/players/player2.png" alt="玩家头像" class="w-full h-full object-cover" loading="lazy">
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-minecraft text-xl text-gray-300">待补[name]</h3>
+                            <p class="text-sm text-light/70">待补[xml]</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-minecraft text-primary">待补[num]</div>
+                            <div class="text-xs text-light/60">待补[type]</div>
+                        </div>
+                    </div>
+                    <div class="minecraft-card p-4 flex items-center bg-gradient-to-r from-amber-700/20 to-transparent">
+                        <div class="w-12 h-12 rounded-full bg-amber-700 flex items-center justify-center font-minecraft text-dark font-bold text-xl mr-4">3</div>
+                        <div class="w-16 h-16 rounded-full overflow-hidden mr-4 block-border">
+                            <img src="pic/players/player3.png" alt="玩家头像" class="w-full h-full object-cover" loading="lazy">
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-minecraft text-xl text-amber-500">待补[name]</h3>
+                            <p class="text-sm text-light/70">待补[xml]</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-minecraft text-primary">待补[num]</div>
+                            <div class="text-xs text-light/60">待补[type]</div>
+                        </div>
+                    </div>
+                    <div class="minecraft-card p-4 flex items-center">
+                        <div class="w-12 h-12 rounded-full bg-dark/60 flex items-center justify-center font-minecraft text-light font-bold text-xl mr-4">4</div>
+                        <div class="w-16 h-16 rounded-full overflow-hidden mr-4 block-border">
+                            <img src="pic/players/player4.png" alt="玩家头像" class="w-full h-full object-cover" loading="lazy">
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-minecraft text-xl">待补[name]</h3>
+                            <p class="text-sm text-light/70">待补[xml]</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-minecraft text-primary">待补[num]</div>
+                            <div class="text-xs text-light/60">待补[type]</div>
+                        </div>
+                    </div>
+                    <div class="minecraft-card p-4 flex items-center">
+                        <div class="w-12 h-12 rounded-full bg-dark/60 flex items-center justify-center font-minecraft text-light font-bold text-xl mr-4">5</div>
+                        <div class="w-16 h-16 rounded-full overflow-hidden mr-4 block-border">
+                            <img src="pic/players/player5.png" alt="玩家头像" class="w-full h-full object-cover" loading="lazy">
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-minecraft text-xl">待补[name]</h3>
+                            <p class="text-sm text-light/70">待补[xml]</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-minecraft text-primary">待补[num]</div>
+                            <div class="text-xs text-light/60">待补[type]</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="rank-list space-y-4 hidden" id="mining-rank">
+                    <div class="minecraft-card p-4 flex items-center bg-gradient-to-r from-accent/20 to-transparent">
+                        <div class="w-12 h-12 rounded-full bg-accent flex items-center justify-center font-minecraft text-dark font-bold text-xl mr-4">1</div>
+                        <div class="w-16 h-16 rounded-full overflow-hidden mr-4 block-border">
+                            <img src="pic/players/miner1.png" alt="玩家头像" class="w-full h-full object-cover" loading="lazy">
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-minecraft text-xl text-accent">待补[name]</h3>
+                            <p class="text-sm text-light/70">待补[xml]</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-minecraft text-primary">待补[num]</div>
+                            <div class="text-xs text-light/60">待补[type]</div>
+                        </div>
+                    </div>
+                    <div class="minecraft-card p-4 flex items-center bg-gradient-to-r from-gray-300/20 to-transparent">
+                        <div class="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center font-minecraft text-dark font-bold text-xl mr-4">2</div>
+                        <div class="w-16 h-16 rounded-full overflow-hidden mr-4 block-border">
+                            <img src="pic/players/miner2.png" alt="玩家头像" class="w-full h-full object-cover" loading="lazy">
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-minecraft text-xl text-gray-300">待补[name]</h3>
+                            <p class="text-sm text-light/70">待补[xml]</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-minecraft text-primary">待补[num]</div>
+                            <div class="text-xs text-light/60">待补[type]</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="rank-list space-y-4 hidden" id="trading-rank">
+                    <div class="minecraft-card p-4 flex items-center bg-gradient-to-r from-accent/20 to-transparent">
+                        <div class="w-12 h-12 rounded-full bg-accent flex items-center justify-center font-minecraft text-dark font-bold text-xl mr-4">1</div>
+                        <div class="w-16 h-16 rounded-full overflow-hidden mr-4 block-border">
+                            <img src="pic/players/trader1.png" alt="玩家头像" class="w-full h-full object-cover" loading="lazy">
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-minecraft text-xl text-accent">待补[name]</h3>
+                            <p class="text-sm text-light/70">待补[xml]</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-minecraft text-primary">待补[num]</div>
+                            <div class="text-xs text-light/60">待补[type]</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="rank-list space-y-4 hidden" id="events-rank">
+                    <div class="minecraft-card p-4 flex items-center bg-gradient-to-r from-accent/20 to-transparent">
+                        <div class="w-12 h-12 rounded-full bg-accent flex items-center justify-center font-minecraft text-dark font-bold text-xl mr-4">1</div>
+                        <div class="w-16 h-16 rounded-full overflow-hidden mr-4 block-border">
+                            <img src="pic/players/event1.png" alt="玩家头像" class="w-full h-full object-cover" loading="lazy">
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-minecraft text-xl text-accent">待补[name]</h3>
+                            <p class="text-sm text-light/70">待补[xml]</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-minecraft text-primary">待补[num]</div>
+                            <div class="text-xs text-light/60">待补[type]</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="rank-list space-y-4 hidden" id="donate-rank">
+                    <div class="minecraft-card p-4 flex items-center bg-gradient-to-r from-accent/20 to-transparent">
+                        <div class="w-12 h-12 rounded-full bg-accent flex items-center justify-center font-minecraft text-dark font-bold text-xl mr-4">1</div>
+                        <div class="w-16 h-16 rounded-full overflow-hidden mr-4 block-border">
+                            <img src="pic/players/donate1.png" alt="玩家头像" class="w-full h-full object-cover" loading="lazy">
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-minecraft text-xl text-accent">待补[name]</h3>
+                            <p class="text-sm text-light/70">待补[xml]</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-minecraft text-primary">待补[num]</div>
+                            <div class="text-xs text-light/60">待补[type]</div>
+                        </div>
+                    </div>
+                    <div class="minecraft-card p-4 flex items-center bg-gradient-to-r from-gray-300/20 to-transparent">
+                        <div class="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center font-minecraft text-dark font-bold text-xl mr-4">2</div>
+                        <div class="w-16 h-16 rounded-full overflow-hidden mr-4 block-border">
+                            <img src="pic/players/donate2.png" alt="玩家头像" class="w-full h-full object-cover" loading="lazy">
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-minecraft text-xl text-gray-300">待补[name]</h3>
+                            <p class="text-sm text-light/70">待补[xml]</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-minecraft text-primary">待补[num]/div>
+                            <div class="text-xs text-light/60">待补[type]</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-8">
+                    <button class="minecraft-btn inline-block"></button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="contact" class="py-20 bg-dark/80 relative">
+        <div class="absolute inset-0 opacity-10">
+            <div class="grass-block h-16 w-full"></div>
+            <div class="wood-block h-4 w-full"></div>
+            <div class="stone-block h-[calc(100%-50px)] w-full"></div>
+        </div>
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="text-center mb-16">
+                <h2 class="text-[clamp(1.8rem,5vw,3rem)] font-minecraft text-primary mb-4">联系方式（没写完（）</h2>
+                <div class="w-32 h-1 bg-primary mx-auto"></div>
+                <p class="mt-4 max-w-2xl mx-auto">有任何问题或建议？请随时联系我们（？</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
+                <div>
+                    <form id="contact-form" class="space-y-6">
+                        <div>
+                            <label for="name" class="block mb-2 font-minecraft">你的名字</label>
+                            <input type="text" id="name" class="w-full bg-dark/60 border border-light/20 rounded p-3 focus:outline-none focus:border-primary transition-colors block-border" placeholder="请输入你的名字" required>
+                        </div>
+                        <div>
+                            <label for="email" class="block mb-2 font-minecraft">电子邮箱</label>
+                            <input type="email" id="email" class="w-full bg-dark/60 border border-light/20 rounded p-3 focus:outline-none focus:border-primary transition-colors block-border" placeholder="请输入你的邮箱" required>
+                        </div>
+                        <div>
+                            <label for="subject" class="block mb-2 font-minecraft">主题</label>
+                            <select id="subject" class="w-full bg-dark/60 border border-light/20 rounded p-3 focus:outline-none focus:border-primary transition-colors block-border" required>
+                                <option value="">请选择主题</option>
+                                <option value="server">服务器问题</option>
+                                <option value="build">建筑展示</option>
+                                <option value="suggestion">建议反馈</option>
+                                <option value="report">举报玩家</option>
+                                <option value="other">其他问题</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="message" class="block mb-2 font-minecraft">留言内容</label>
+                            <textarea id="message" rows="5" class="w-full bg-dark/60 border border-light/20 rounded p-3 focus:outline-none focus:border-primary transition-colors block-border" placeholder="请输入你的留言内容" required></textarea>
+                        </div>
+                        <button type="submit" class="minecraft-btn w-full">发送留言 <i class="fa fa-paper-plane ml-2"></i></button>
+                    </form>
+                </div>
+                <div class="flex flex-col justify-center">
+                    <h3 class="text-2xl font-minecraft text-accent mb-6">联系方式</h3>
+                    <div class="space-y-6">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fa fa-envelope text-primary text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-minecraft text-lg mb-1">反馈电子邮箱</h4>
+                                <p>atissue@truslerweb.dpdns.org</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div>
+                                <h4 class="font-minecraft text-lg mb-1">QQ群</h4>
+                                <p>玩家交流群</p>
+                                <a href="#" class="text-primary hover:underline mt-1 inline-block">群号: 953724206</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-10">
+                        <h4 class="font-minecraft text-lg mb-4">关注我们</h4>
+                        <div class="flex space-x-4">
+                            <a href="#" class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center hover:bg-primary/40 transition-colors"><i class="fa fa-facebook"></i></a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center hover:bg-primary/40 transition-colors"><i class="fa fa-twitter"></i></a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center hover:bg-primary/40 transition-colors"><i class="fa fa-instagram"></i></a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center hover:bg-primary/40 transition-colors"><i class="fa fa-reddit"></i></a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center hover:bg-primary/40 transition-colors"><i class="fa fa-bilibili"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="py-20 bg-dark">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-[clamp(1.8rem,5vw,3rem)] font-minecraft text-primary mb-4">常见问题</h2>
+                <div class="w-32 h-1 bg-primary mx-auto"></div>
+                <p class="mt-4 max-w-2xl mx-auto">解答玩家常见问题</p>
+            </div>
+            <div class="max-w-3xl mx-auto space-y-4">
+                <div class="minecraft-card">
+                    <button class="faq-toggle w-full flex justify-between items-center p-4 text-left focus:outline-none">
+                        <span class="font-minecraft text-lg">如何加入服务器？</span>
+                        <i class="fa fa-chevron-down text-primary transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content hidden px-4 pb-4">
+                        <p>1. 下载对应客户端压缩包并解压到任意文件夹<br>2. 运行"PCL2"或者"HMCL"<br>3. 登录账号后(离线填写玩家名)将文件夹内的AutumnTown_Forge_x.xx.zip直接拖入启动器<br>4. 安装完成后点击启动游戏后等待游戏启动后就行了</p>
+                    </div>
+                </div>
+                <div class="minecraft-card">
+                    <button class="faq-toggle w-full flex justify-between items-center p-4 text-left focus:outline-none">
+                        <span class="font-minecraft text-lg">客户端无法启动怎么办？</span>
+                        <i class="fa fa-chevron-down text-primary transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content hidden px-4 pb-4">
+                        <p>1. 确保你的电脑满足最低配置要求<br>2. 尝试以管理员身份运行启动器<br>3. 检查是否安装了最新的Java版本<br>4. 重新下载并安装客户端<br>5. 如仍有问题，请联系技术支持或群里提问（有log必须提供log）</p>
+                    </div>
+                </div>
+                <div class="minecraft-card">
+                    <button class="faq-toggle w-full flex justify-between items-center p-4 text-left focus:outline-none">
+                        <span class="font-minecraft text-lg">如何举报违规玩家？</span>
+                        <i class="fa fa-chevron-down text-primary transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content hidden px-4 pb-4">
+                        <p>1. 私信群主或管理员举报<br>2. 在QQ群内@管理员或群主提交举报<br>3. 通过反馈邮箱提交举报，记得附上证据截图<br>我们会在24小时内处理你的举报</p>
+                    </div>
+                </div>
+                <div class="minecraft-card">
+                    <button class="faq-toggle w-full flex justify-between items-center p-4 text-left focus:outline-none">
+                        <span class="font-minecraft text-lg">服务器会定期重置吗？</span>
+                        <i class="fa fa-chevron-down text-primary transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content hidden px-4 pb-4">
+                        <p>我们尽量避免服务器重置，除非有重大更新需要。每次可能的重置会提前两周发布公告，让玩家有足够时间备份重要物品</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <footer class="bg-dark py-10 border-t border-light/10">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-4 gap-8 mb-10">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <div class="w-8 h-8 grass-block block-border mr-2"></div>
+                        <h3 class="text-xl font-minecraft text-primary">秋日小镇</h3>
+                    </div>
+                    <p class="text-sm text-light/70">test v1.001</p>
+                </div>
+                <div>
+                    <h4 class="font-minecraft text-accent mb-4">快速链接</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#home" class="hover:text-primary transition-colors">首页</a></li>
+                        <li><a href="#about" class="hover:text-primary transition-colors">游玩须知</a></li>
+                        <li><a href="#gallery" class="hover:text-primary transition-colors">精选图片</a></li>
+                        <li><a href="#servers" class="hover:text-primary transition-colors">服务器</a></li>
+                        <li><a href="#news" class="hover:text-primary transition-colors">最新动态</a></li>
+                        <li><a href="#contact" class="hover:text-primary transition-colors">联系我们</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-minecraft text-accent mb-4">资源</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#download" class="hover:text-primary transition-colors">客户端下载</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">待补</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">待补</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">待补</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">待补</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-minecraft text-accent mb-4">订阅更新</h4>
+                    <p class="text-sm text-light/70 mb-4">获取最新的服务器信息和游戏资讯</p>
+                    <form class="flex">
+                        <input type="email" placeholder="你的邮箱（没做完）" class="flex-1 bg-dark/60 border border-light/20 rounded-l p-2 focus:outline-none focus:border-primary transition-colors block-border" required>
+                        <button type="submit" class="bg-primary hover:bg-primary/80 px-3 rounded-r transition-colors block-border"><i class="fa fa-arrow-right"></i></button>
+                    </form>
+                </div>
+            </div>
+            <div class="pt-6 border-t border-light/10 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-sm text-light/50 mb-4 md:mb-0"> 2025 AutumnTown 秋日小镇 <br>html code by @Trusler and @bilibili_haoqi</p>
+            </div>
+        </div>
+    </footer>
+    <button id="back-to-top" class="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center opacity-0 invisible transition-all duration-300 hover:bg-primary/80 block-border z-30"><i class="fa fa-chevron-up"></i></button>
+    <div id="notification" class="fixed top-6 right-6 bg-dark/90 backdrop-blur-md p-4 rounded-lg shadow-lg transform translate-x-full transition-transform duration-500 z-50 block-border max-w-xs">
+        <div class="flex items-start">
+            <div class="mr-3 text-primary text-xl"><i class="fa fa-check-circle"></i></div>
+            <div>
+                <h4 class="font-minecraft text-accent mb-1">操作成功</h4>
+                <p id="notification-message" class="text-sm">服务器IP已复制到剪贴板</p>
+            </div>
+            <button onclick="hideNotification()" class="ml-auto text-light/50 hover:text-light"><i class="fa fa-times"></i></button>
+        </div>
+    </div>
+    <button id="chat-toggle" class="fixed bottom-6 left-6 w-12 h-12 rounded-full bg-secondary text-white flex items-center justify-center shadow-lg transition-all duration-300 hover:bg-secondary/80 block-border z-30"><i class="fa fa-comments"></i></button>
+    <div id="chat-window" class="fixed bottom-20 left-6 w-80 bg-dark/95 backdrop-blur-md rounded-lg shadow-lg block-border transform -translate-y-full opacity-0 transition-all duration-300 z-30">
+        <div class="p-4 border-b border-light/10 flex justify-between items-center">
+            <h3 class="font-minecraft text-accent">玩家聊天（假）</h3>
+            <button onclick="toggleChat()" class="text-light/50 hover:text-light"><i class="fa fa-times"></i></button>
+        </div>
+        <div id="chat-messages" class="h-64 overflow-y-auto p-4 space-y-3">
+            <div class="flex">
+                <div class="w-8 h-8 rounded-full overflow-hidden mr-2 flex-shrink-0">
+                    <img src="pic/players/player1.png" alt="玩家头像" class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <div class="font-minecraft text-xs text-primary">方块建筑师</div>
+                    <div class="text-sm bg-dark/60 p-2 rounded">有人一起去挖矿吗？</div>
+                </div>
+            </div>
+            <div class="flex">
+                <div class="w-8 h-8 rounded-full overflow-hidden mr-2 flex-shrink-0">
+                    <img src="pic/players/player2.png" alt="玩家头像" class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <div class="font-minecraft text-xs text-primary">红石大师</div>
+                    <div class="text-sm bg-dark/60 p-2 rounded">我刚发现一个钻石矿，一起来吧！</div>
+                </div>
+            </div>
+        </div>
+        <div class="p-4 border-t border-light/10">
+            <form id="chat-form" class="flex">
+                <input type="text" placeholder="输入消息..." class="flex-1 bg-dark/60 border border-light/20 rounded-l p-2 focus:outline-none focus:border-primary transition-colors block-border text-sm">
+                <button type="submit" class="bg-secondary hover:bg-secondary/80 px-3 rounded-r transition-colors block-border"><i class="fa fa-paper-plane"></i></button>
+            </form>
+        </div>
+    </div>
+    <script>
+        window.addEventListener('load', () => {
+            document.getElementById('loading-bar').style.width = '100%';
+            setTimeout(() => { document.getElementById('loading-bar').style.opacity = '0'; }, 500);
+            setTimeout(() => {
+                document.getElementById('hero-subtitle').classList.add('animate-fade-in');
+                document.getElementById('hero-subtitle').style.opacity = '1';
+            }, 300);
+            setTimeout(() => {
+                document.getElementById('hero-buttons').classList.add('animate-slide-up');
+                document.getElementById('hero-buttons').style.opacity = '1';
+            }, 600);
+        });
+        window.addEventListener('DOMContentLoaded', () => {
+            let progress = 0;
+            const loadingBar = document.getElementById('loading-bar');
+            const interval = setInterval(() => {
+                progress += 5;
+                if (progress >= 70) clearInterval(interval);
+                loadingBar.style.width = `${progress}%`;
+            }, 100);
+        });
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        menuToggle.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            menuToggle.innerHTML = mobileMenu.classList.contains('hidden') ? '<i class="fa fa-bars"></i>' : '<i class="fa fa-times"></i>';
+        });
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('py-2', 'shadow-lg');
+                navbar.classList.remove('py-3');
+            } else {
+                navbar.classList.add('py-3');
+                navbar.classList.remove('py-2', 'shadow-lg');
+            }
+        });
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                    menuToggle.innerHTML = '<i class="fa fa-bars"></i>';
+                }
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({ top: targetElement.offsetTop - 80, behavior: 'smooth' });
+                }
+            });
+        });
+        const backToTopButton = document.getElementById('back-to-top');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopButton.classList.remove('opacity-0', 'invisible');
+                backToTopButton.classList.add('opacity-100', 'visible');
+            } else {
+                backToTopButton.classList.add('opacity-0', 'invisible');
+                backToTopButton.classList.remove('opacity-100', 'visible');
+            }
+        });
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        function copyIP(ip) {
+            navigator.clipboard.writeText(ip).then(() => {
+                showNotification(`服务器IP ${ip} 已复制到剪贴板`);
+            }).catch(err => {
+                showNotification('复制失败，请手动复制', false);
+                console.error('复制失败: ', err);
+            });
+        }
+        const notification = document.getElementById('notification');
+        const notificationMessage = document.getElementById('notification-message');
+        function showNotification(message, isSuccess = true) {
+            notificationMessage.textContent = message;
+            notification.querySelector('i').className = isSuccess ? 'fa fa-check-circle text-primary' : 'fa fa-exclamation-circle text-red-500';
+            notification.querySelector('h4').className = isSuccess ? 'font-minecraft text-accent mb-1' : 'font-minecraft text-red-500 mb-1';
+            notification.classList.remove('translate-x-full');
+            setTimeout(hideNotification, 5000);
+        }
+        function hideNotification() { notification.classList.add('translate-x-full'); }
+        const contactForm = document.getElementById('contact-form');
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+            if (!name || !email || !message) {
+                showNotification('请填写所有必填字段', false);
+                return;
+            }
+            showNotification('留言已发送，我们会尽快回复你');
+            contactForm.reset();
+        });
+        const galleryFilters = document.querySelectorAll('.gallery-filter');
+        const galleryItems = document.querySelectorAll('.gallery-item');
+        galleryFilters.forEach(filter => {
+            filter.addEventListener('click', () => {
+                galleryFilters.forEach(f => f.classList.remove('active', 'bg-primary/40'));
+                filter.classList.add('active', 'bg-primary/40');
+                const category = filter.getAttribute('data-filter');
+                galleryItems.forEach(item => {
+                    if (category === 'all' || item.getAttribute('data-category') === category) {
+                        item.style.display = 'block';
+                        setTimeout(() => {
+                            item.style.opacity = '1';
+                            item.style.transform = 'scale(1)';
+                        }, 50);
+                    } else {
+                        item.style.opacity = '0';
+                        item.style.transform = 'scale(0.8)';
+                        setTimeout(() => { item.style.display = 'none'; }, 300);
+                    }
+                });
+            });
+        });
+        const rankFilters = document.querySelectorAll('.rank-filter');
+        rankFilters.forEach(filter => {
+            filter.addEventListener('click', () => {
+                rankFilters.forEach(f => {
+                    f.classList.remove('active', 'bg-primary', 'text-white');
+                    f.classList.add('bg-dark/60', 'hover:bg-primary/20');
+                });
+                filter.classList.add('active', 'bg-primary', 'text-white');
+                filter.classList.remove('bg-dark/60', 'hover:bg-primary/20');
+                const rankType = filter.getAttribute('data-rank');
+                document.querySelectorAll('.rank-list').forEach(list => { list.classList.add('hidden'); });
+                document.getElementById(`${rankType}-rank`).classList.remove('hidden');
+                showNotification(`已切换到${getRankTypeName(rankType)}排行榜`);
+            });
+        });
+        function getRankTypeName(type) {
+            const names = { 'building': '建筑大师', 'mining': '挖矿达人', 'trading': '交易之王', 'events': '活动明星', 'donate': '赞助榜' };
+            return names[type] || type;
+        }
+        const faqToggles = document.querySelectorAll('.faq-toggle');
+        faqToggles.forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const content = toggle.nextElementSibling;
+                const icon = toggle.querySelector('i');
+                content.classList.toggle('hidden');
+                icon.style.transform = content.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+            });
+        });
+        const chatToggle = document.getElementById('chat-toggle');
+        const chatWindow = document.getElementById('chat-window');
+        function toggleChat() {
+            if (chatWindow.classList.contains('opacity-0')) {
+                chatWindow.classList.remove('-translate-y-full', 'opacity-0');
+                chatWindow.classList.add('translate-y-0', 'opacity-100');
+                chatToggle.innerHTML = '<i class="fa fa-times"></i>';
+            } else {
+                chatWindow.classList.add('-translate-y-full', 'opacity-0');
+                chatWindow.classList.remove('translate-y-0', 'opacity-100');
+                chatToggle.innerHTML = '<i class="fa fa-comments"></i>';
+            }
+        }
+        chatToggle.addEventListener('click', toggleChat);
+        const chatForm = document.getElementById('chat-form');
+        const chatMessages = document.getElementById('chat-messages');
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const input = chatForm.querySelector('input');
+            const message = input.value.trim();
+            if (message) {
+                const newMessage = `<div class="flex justify-end"><div class="text-right"><div class="font-minecraft text-xs text-accent">我</div><div class="text-sm bg-primary/20 p-2 rounded">${message}</div></div></div>`;
+                chatMessages.insertAdjacentHTML('beforeend', newMessage);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                input.value = '';
+                setTimeout(() => {
+                    const replies = ["好的，我知道了！", "我稍后会去看看", "这个想法不错！", "大家一起玩才开心", "我也遇到过类似的问题"];
+                    const randomReply = replies[Math.floor(Math.random() * replies.length)];
+                    const replyMessage = `<div class="flex"><div class="w-8 h-8 rounded-full overflow-hidden mr-2 flex-shrink-0"><img src="pic/players/player${Math.floor(Math.random() * 5) + 1}.png" alt="玩家头像" class="w-full h-full object-cover"></div><div><div class="font-minecraft text-xs text-primary">玩家${Math.floor(Math.random() * 100)}</div><div class="text-sm bg-dark/60 p-2 rounded">${randomReply}</div></div></div>`;
+                    chatMessages.insertAdjacentHTML('beforeend', replyMessage);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 1000 + Math.random() * 2000);
+            }
+        });
+        function updateServerStatus() {
+            const playerCount = document.getElementById('player-count');
+            const playerBar = document.getElementById('player-bar');
+            const serverPing = document.getElementById('server-ping');
+            const pingBar = document.getElementById('ping-bar');
+            const currentPlayers = parseInt(playerCount.textContent);
+            const newPlayers = Math.max(10, Math.min(99, currentPlayers + (Math.random() > 0.5 ? 1 : -1)));
+            const percentage = (newPlayers / 100) * 100;
+            playerCount.textContent = `${newPlayers}/100`;
+            playerBar.style.width = `${percentage}%`;
+            const newPing = Math.floor(Math.random() * 50) + 10;
+            const pingPercentage = 100 - (newPing / 100) * 100;
+            serverPing.textContent = `${newPing} ms`;
+            pingBar.style.width = `${pingPercentage}%`;
+        }
+        setInterval(updateServerStatus, 30000);
+        const animateOnScroll = () => {
+            const elements = document.querySelectorAll('.minecraft-card, .gallery-item');
+            elements.forEach(element => {
+                if (!element.classList.contains('animate-block-appear') && !element.classList.contains('visibility-hidden')) {
+                    const elementPosition = element.getBoundingClientRect().top;
+                    const windowHeight = window.innerHeight;
+                    if (elementPosition < windowHeight - 100) {
+                        element.classList.add('animate-block-appear');
+                    }
+                }
+            });
+        };
+        window.addEventListener('load', animateOnScroll);
+        window.addEventListener('scroll', animateOnScroll);
+    </script>
+</body>
+</html>
